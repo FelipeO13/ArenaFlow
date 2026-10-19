@@ -1,0 +1,87 @@
+@page
+@model BoxeGymManager.Pages.Schedule.CreateModel
+@{
+    ViewData["Title"] = "Nova Turma de Boxe";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">CADASTRAR HORÁRIO / TURMA</h1>
+        <p class="text-secondary mb-0">Adicione uma nova sessão na grade semanal de treinos.</p>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="boxing-card p-4">
+            <form method="post">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="BoxingClass.Title" class="form-label text-light small fw-bold">Título da Aula</label>
+                        <input asp-for="BoxingClass.Title" class="form-control" placeholder="Ex: Sparring Supervisionado, Fundamentos, etc." required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.CoachName" class="form-label text-light small fw-bold">Treinador / Mestre</label>
+                        <input asp-for="BoxingClass.CoachName" class="form-control" placeholder="Ex: Mestre Popó" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.DayOfWeek" class="form-label text-light small fw-bold">Dia da Semana</label>
+                        <select asp-for="BoxingClass.DayOfWeek" class="form-select">
+                            <option value="Monday">Segunda-feira</option>
+                            <option value="Tuesday">Terça-feira</option>
+                            <option value="Wednesday">Quarta-feira</option>
+                            <option value="Thursday">Quinta-feira</option>
+                            <option value="Friday">Sexta-feira</option>
+                            <option value="Saturday">Sábado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.StartTime" class="form-label text-light small fw-bold">Horário de Início</label>
+                        <input asp-for="BoxingClass.StartTime" type="time" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.EndTime" class="form-label text-light small fw-bold">Horário de Término</label>
+                        <input asp-for="BoxingClass.EndTime" type="time" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.MaxCapacity" class="form-label text-light small fw-bold">Capacidade de Alunos</label>
+                        <input asp-for="BoxingClass.MaxCapacity" type="number" min="1" max="100" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.RingOrRoom" class="form-label text-light small fw-bold">Local / Espaço</label>
+                        <input asp-for="BoxingClass.RingOrRoom" class="form-control" placeholder="Ex: Ringue Principal, Área de Sacos" />
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="BoxingClass.LevelRequirement" class="form-label text-light small fw-bold">Nível Exigido</label>
+                        <input asp-for="BoxingClass.LevelRequirement" class="form-control" placeholder="Ex: Todos os níveis, Intermediário, Atletas..." />
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" asp-for="BoxingClass.IsActive" checked />
+                            <label class="form-check-label text-light" asp-for="BoxingClass.IsActive">
+                                Horário Ativo
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg fw-bold py-3">
+                        <i class="bi bi-calendar-plus me-2"></i> Adicionar à Grade Semanal
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

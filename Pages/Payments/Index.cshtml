@@ -1,0 +1,173 @@
+@page
+@model BoxeGymManager.Pages.Payments.IndexModel
+@{
+    ViewData["Title"] = "Gestão Financeira & Mensalidades";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">CONTROLE FINANCEIRO & MENSALIDADES</h1>
+        <p class="text-secondary mb-0">Gestão de receitas, status de pagamentos e emissão de recibos dos atletas.</p>
+    </div>
+    <div>
+        <a asp-page="/Payments/Create" class="btn btn-success fw-bold px-4 py-2">
+            <i class="bi bi-plus-circle me-1"></i> Lançar Nova Mensalidade
+        </a>
+    </div>
+</div>
+
+<!-- Cards Financeiros de Resumo -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="boxing-card boxing-card-accent-green p-3">
+            <div class="text-secondary small text-uppercase fw-semibold mb-1">Total Recebido</div>
+            <div class="stat-number text-success">@Model.TotalPaid.ToString("C")</div>
+            <div class="small text-muted">Mensalidades confirmadas</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="boxing-card boxing-card-accent-gold p-3">
+            <div class="text-secondary small text-uppercase fw-semibold mb-1">A Vencer (Pendente)</div>
+            <div class="stat-number text-warning">@Model.TotalPending.ToString("C")</div>
+            <div class="small text-muted">Aguardando pagamento no prazo</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="boxing-card boxing-card-accent-red p-3">
+            <div class="text-secondary small text-uppercase fw-semibold mb-1">Vencido / Atrasado</div>
+            <div class="stat-number text-danger">@Model.TotalOverdue.ToString("C")</div>
+            <div class="small text-muted">Mensalidades em débito</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="boxing-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-black text-secondary border-secondary">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" asp-for="Search" class="form-control bg-black text-white border-secondary" placeholder="Buscar por atleta, matrícula ou recibo..." />
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <select asp-for="StatusFilter" class="form-select bg-black text-white border-secondary" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.PaymentStatus>()">
+                <option value="">Todos os Status</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-danger w-100 fw-semibold">Filtrar</button>
+            <a asp-page="/Payments/Index" class="btn btn-outline-secondary">Limpar</a>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Pagamentos -->
+<div class="boxing-card p-4">
+    @if (Model.Payments.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-custom">
+                <thead>
+                    <tr>
+                        <th>Recibo</th>
+                        <th>Atleta</th>
+                        <th>Referência</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Status</th>
+                        <th>Forma</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Payments)
+                    {
+                        var isOverdue = p.Status == BoxeGymManager.Models.PaymentStatus.Atrasado || (p.Status == BoxeGymManager.Models.PaymentStatus.Pendente && p.DueDate < DateTime.Today);
+
+                        <tr>
+                            <td><span class="badge bg-secondary">@p.ReceiptCode</span></td>
+                            <td>
+                                <div class="fw-bold text-white">@p.Student?.FullName</div>
+                                <div class="small text-secondary">Matrícula: @p.Student?.RegistrationCode</div>
+                            </td>
+                            <td>@p.ReferenceMonthYear</td>
+                            <td class="text-success fw-bold fs-6">@p.Amount.ToString("C")</td>
+                            <td>
+                                <div>@p.DueDate.ToString("dd/MM/yyyy")</div>
+                                @if (p.PaidDate.HasValue)
+                                {
+                                    <div class="small text-muted">Pago em: @p.PaidDate.Value.ToString("dd/MM")</div>
+                                }
+                            </td>
+                            <td>
+                                @if (p.Status == BoxeGymManager.Models.PaymentStatus.Pago)
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Pago</span>
+                                }
+                                else if (isOverdue)
+                                {
+                                    <span class="badge bg-danger"><i class="bi bi-exclamation-triangle"></i> Atrasado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pendente</span>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-dark border border-secondary text-secondary">@p.Method</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-page="/Payments/Receipt" asp-route-id="@p.Id" class="btn btn-outline-light" title="Ver Recibo Oficial">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+
+                                    @if (p.Status != BoxeGymManager.Models.PaymentStatus.Pago)
+                                    {
+                                        <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Confirmar Pagamento
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                                            <li>
+                                                <form method="post" asp-page-handler="MarkAsPaid" asp-route-id="@p.Id" asp-route-method="@BoxeGymManager.Models.PaymentMethod.Pix">
+                                                    <button type="submit" class="dropdown-item text-success"><i class="bi bi-qr-code me-2"></i> Recebido via Pix</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" asp-page-handler="MarkAsPaid" asp-route-id="@p.Id" asp-route-method="@BoxeGymManager.Models.PaymentMethod.Dinheiro">
+                                                    <button type="submit" class="dropdown-item"><i class="bi bi-cash me-2"></i> Recebido em Dinheiro</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" asp-page-handler="MarkAsPaid" asp-route-id="@p.Id" asp-route-method="@BoxeGymManager.Models.PaymentMethod.CartaoCredito">
+                                                    <button type="submit" class="dropdown-item"><i class="bi bi-credit-card me-2"></i> Cartão de Crédito</button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="post" asp-page-handler="MarkAsPaid" asp-route-id="@p.Id" asp-route-method="@BoxeGymManager.Models.PaymentMethod.CartaoDebito">
+                                                    <button type="submit" class="dropdown-item"><i class="bi bi-credit-card-2-front me-2"></i> Cartão de Débito</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-receipt-cutoff fs-1 d-block mb-2"></i>
+            Nenhum registro de pagamento encontrado.
+        </div>
+    }
+</div>

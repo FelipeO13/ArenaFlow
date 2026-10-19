@@ -1,0 +1,212 @@
+@page "{id:int}"
+@model BoxeGymManager.Pages.Students.EditModel
+@{
+    ViewData["Title"] = $"Editar {Model.Student.FullName}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">EDITAR DADOS DO ATLETA</h1>
+        <p class="text-secondary mb-0">Matrícula: <span class="badge bg-danger">@Model.Student.RegistrationCode</span></p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-page="./Details" asp-route-id="@Model.Student.Id" class="btn btn-outline-info">
+            <i class="bi bi-eye me-1"></i> Ver Ficha
+        </a>
+        <a asp-page="./Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<form method="post">
+    <input type="hidden" asp-for="Student.Id" />
+    <input type="hidden" asp-for="Student.RegistrationCode" />
+
+    <div class="row g-4">
+        <!-- Coluna Esquerda: Dados Pessoais & Emergência -->
+        <div class="col-lg-6">
+            <div class="boxing-card p-4 mb-4">
+                <h3 class="h5 text-white mb-3">
+                    <i class="bi bi-person-lines-fill text-danger me-2"></i> Dados Cadastrais
+                </h3>
+
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Student.FullName" class="form-label text-light small fw-bold">Nome Completo</label>
+                        <input asp-for="Student.FullName" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.CPF" class="form-label text-light small fw-bold">CPF</label>
+                        <input asp-for="Student.CPF" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.BirthDate" class="form-label text-light small fw-bold">Data de Nascimento</label>
+                        <input asp-for="Student.BirthDate" type="date" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.Phone" class="form-label text-light small fw-bold">Telefone / WhatsApp</label>
+                        <input asp-for="Student.Phone" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.Email" class="form-label text-light small fw-bold">E-mail</label>
+                        <input asp-for="Student.Email" type="email" class="form-control" />
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Student.Address" class="form-label text-light small fw-bold">Endereço</label>
+                        <input asp-for="Student.Address" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergência -->
+            <div class="boxing-card p-4 border-danger border-opacity-50">
+                <h3 class="h5 text-danger mb-3">
+                    <i class="bi bi-telephone-plus me-2"></i> Contato de Emergência
+                </h3>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Student.EmergencyContactName" class="form-label text-light small fw-bold">Nome do Contato</label>
+                        <input asp-for="Student.EmergencyContactName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Student.EmergencyContactPhone" class="form-label text-light small fw-bold">Telefone</label>
+                        <input asp-for="Student.EmergencyContactPhone" class="form-control" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Boxe & Plano -->
+        <div class="col-lg-6">
+            <div class="boxing-card p-4 mb-4">
+                <h3 class="h5 text-danger mb-3">
+                    <i class="bi bi-shield-shaded me-2"></i> Ficha de Boxe & Luta
+                </h3>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Student.WeightKg" class="form-label text-light small fw-bold">Peso Atual (Kg)</label>
+                        <input asp-for="Student.WeightKg" type="number" step="0.1" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.WeightCategory" class="form-label text-light small fw-bold">Categoria de Peso</label>
+                        <input asp-for="Student.WeightCategory" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.ExperienceLevel" class="form-label text-light small fw-bold">Nível no Boxe</label>
+                        <select asp-for="Student.ExperienceLevel" class="form-select" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.BoxingLevel>()"></select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.Stance" class="form-label text-light small fw-bold">Base de Luta</label>
+                        <select asp-for="Student.Stance" class="form-select">
+                            <option value="Destro (Orthodox)">Destro (Orthodox)</option>
+                            <option value="Canhoto (Southpaw)">Canhoto (Southpaw)</option>
+                            <option value="Ambidestro (Switch)">Ambidestro (Switch)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Student.MedicalNotes" class="form-label text-light small fw-bold">Restrições / Notas Médicas</label>
+                        <textarea asp-for="Student.MedicalNotes" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" asp-for="Student.HasMedicalCertificate" />
+                            <label class="form-check-label text-light" asp-for="Student.HasMedicalCertificate">
+                                Atestado médico regularizado
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano de Acesso -->
+            <div class="boxing-card p-4 mb-4">
+                <h3 class="h5 text-white mb-3">
+                    <i class="bi bi-card-checklist text-danger me-2"></i> Plano de Treino
+                </h3>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Student.PlanId" class="form-label text-light small fw-bold">Plano de Treino Escolhido</label>
+                        <select asp-for="Student.PlanId" class="form-select" asp-items="Model.PlansList">
+                            <option value="">-- Sem plano associado --</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.PlanStartDate" class="form-label text-light small fw-bold">Início do Plano</label>
+                        <input asp-for="Student.PlanStartDate" type="date" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.PlanEndDate" class="form-label text-light small fw-bold">Vencimento do Plano</label>
+                        <input asp-for="Student.PlanEndDate" type="date" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Situação da Matrícula (Ativar / Trancar / Cancelar) -->
+            <div class="boxing-card p-4 mb-4 border border-secondary">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 text-white mb-0">
+                        <i class="bi bi-person-badge-fill text-danger me-2"></i> Situação da Matrícula
+                    </h3>
+                    @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
+                    {
+                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Ativo</span>
+                    }
+                    else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
+                    {
+                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-pause-circle-fill me-1"></i> Trancado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-6"><i class="bi bi-x-circle-fill me-1"></i> Cancelado</span>
+                    }
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Student.Status" class="form-label text-light small fw-bold">Status da Inscrição</label>
+                        <select asp-for="Student.Status" class="form-select form-select-lg fw-bold" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.StudentStatus>()">
+                        </select>
+                        <div class="form-text text-secondary mt-2">
+                            <span class="text-success fw-bold">Ativo:</span> Aluno liberado nos treinos e catraca.<br />
+                            <span class="text-warning fw-bold">Trancado:</span> Pausa temporária (férias, viagem, atestado médico) sem perder dados.<br />
+                            <span class="text-danger fw-bold">Cancelado:</span> Matrícula encerrada / desistência do aluno.
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Student.StatusReason" class="form-label text-light small fw-bold">Motivo / Observação do Status</label>
+                        <input asp-for="Student.StatusReason" class="form-control" placeholder="Ex: Viagem por 30 dias, lesão no ombro, cancelamento a pedido, etc." />
+                    </div>
+
+                    @if (Model.Student.StatusChangedAt.HasValue)
+                    {
+                        <div class="col-12 text-muted small">
+                            <i class="bi bi-clock-history me-1"></i> Última alteração de status: @Model.Student.StatusChangedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-danger btn-lg fw-bold text-white py-3 shadow">
+                    <i class="bi bi-save me-2"></i> Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

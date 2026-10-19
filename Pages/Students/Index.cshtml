@@ -1,0 +1,160 @@
+@page
+@model BoxeGymManager.Pages.Students.IndexModel
+@{
+    ViewData["Title"] = "Gestão de Alunos";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">GESTÃO DE ATLETAS & ALUNOS</h1>
+        <p class="text-secondary mb-0">Cadastro completo de alunos, ficha técnica de boxe e histórico esportivo.</p>
+    </div>
+    <div>
+        <a asp-page="/Students/Create" class="btn btn-danger fw-bold px-4 py-2">
+            <i class="bi bi-person-plus-fill me-2"></i> Cadastrar Novo Atleta
+        </a>
+    </div>
+</div>
+
+<!-- Filtros de Busca -->
+<div class="boxing-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-black text-secondary border-secondary">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" asp-for="Search" class="form-control bg-black text-white border-secondary" placeholder="Buscar por nome, matrícula (ex: BX-1001) ou CPF..." />
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <select asp-for="LevelFilter" class="form-select bg-black text-white border-secondary" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.BoxingLevel>()">
+                <option value="">Todos os Níveis de Boxe</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select asp-for="StatusFilter" class="form-select bg-black text-white border-secondary">
+                <option value="">Todos os Status</option>
+                <option value="Ativo">🟢 Ativos</option>
+                <option value="Trancado">🟡 Trancados</option>
+                <option value="Cancelado">🔴 Cancelados</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-danger w-100 fw-semibold">Filtrar</button>
+            <a asp-page="/Students/Index" class="btn btn-outline-secondary">Limpar</a>
+        </div>
+    </form>
+</div>
+
+<!-- Tabela de Alunos -->
+<div class="boxing-card p-4">
+    @if (Model.Students.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-dark-custom">
+                <thead>
+                    <tr>
+                        <th>Matrícula & Atleta</th>
+                        <th>Nível & Categoria</th>
+                        <th>Plano</th>
+                        <th>Status Mensalidade</th>
+                        <th>Situação</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Students)
+                    {
+                        var hasOverdue = s.Payments.Any(p => p.Status == BoxeGymManager.Models.PaymentStatus.Atrasado || (p.Status == BoxeGymManager.Models.PaymentStatus.Pendente && p.DueDate < DateTime.Today));
+                        var planExpired = s.PlanEndDate.HasValue && s.PlanEndDate.Value < DateTime.Today;
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-danger bg-opacity-25 text-danger d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; min-width: 40px;">
+                                        @(s.FullName.Length > 0 ? s.FullName.Substring(0, 1) : "A")
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white fs-6">
+                                            <a asp-page="/Students/Details" asp-route-id="@s.Id" class="text-decoration-none text-white hover-red">
+                                                @s.FullName
+                                            </a>
+                                        </div>
+                                        <div class="small text-secondary">
+                                            <span class="badge bg-secondary">@s.RegistrationCode</span> &bull; Tel: @s.Phone
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div><span class="badge bg-dark border border-secondary text-warning">@s.ExperienceLevel</span></div>
+                                <div class="small text-muted mt-1">
+                                    @s.WeightKg kg &bull; @s.Stance
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-light">@(s.Plan?.Name ?? "Sem plano associado")</div>
+                                @if (s.PlanEndDate.HasValue)
+                                {
+                                    <div class="small text-muted">Vence em: @s.PlanEndDate.Value.ToString("dd/MM/yyyy")</div>
+                                }
+                            </td>
+                            <td>
+                                @if (hasOverdue || planExpired)
+                                {
+                                    <span class="badge bg-danger text-white"><i class="bi bi-exclamation-triangle-fill"></i> Pendência/Atrasado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Regular</span>
+                                }
+                            </td>
+                            <td>
+                                @if (s.Status == BoxeGymManager.Models.StudentStatus.Ativo)
+                                {
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success">Ativo</span>
+                                }
+                                else if (s.Status == BoxeGymManager.Models.StudentStatus.Trancado)
+                                {
+                                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning" title="@s.StatusReason">
+                                        <i class="bi bi-pause-fill"></i> Trancado
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger bg-opacity-25 text-danger border border-danger" title="@s.StatusReason">
+                                        <i class="bi bi-x"></i> Cancelado
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-page="/Students/Details" asp-route-id="@s.Id" class="btn btn-outline-light" title="Ver Perfil Completo">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-page="/Students/Edit" asp-route-id="@s.Id" class="btn btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-page="/Payments/Create" asp-route-studentId="@s.Id" class="btn btn-outline-success" title="Registrar Pagamento">
+                                        <i class="bi bi-cash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-person-x fs-1 d-block mb-2"></i>
+            Nenhum atleta encontrado com os filtros aplicados.
+        </div>
+    }
+</div>

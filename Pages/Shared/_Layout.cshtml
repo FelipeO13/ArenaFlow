@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Nobre Arte Boxe Club</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-dark text-light">
+    <!-- Navbar Superior -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-2 sticky-top shadow">
+            <div class="container-fluid px-4">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-page="/Index">
+                    <span class="boxing-badge"><i class="bi bi-shield-shaded text-danger fs-3"></i></span>
+                    <div>
+                        <span class="fs-4 fw-bold tracking-wide brand-title text-white">NOBRE ARTE</span>
+                        <span class="badge bg-danger ms-1 text-uppercase fw-bold" style="font-size: 0.65rem;">Boxe Club</span>
+                    </div>
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                        aria-controls="navbarMain" aria-expanded="false" aria-label="Menu de Navegação">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString() == "/Index" ? "active" : "")" asp-page="/Index">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/CheckIn") == true ? "active" : "")" asp-page="/CheckIn/Index">
+                                <i class="bi bi-door-open me-1"></i> Entrada & Saída
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Students") == true ? "active" : "")" asp-page="/Students/Index">
+                                <i class="bi bi-people me-1"></i> Alunos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Schedule") == true ? "active" : "")" asp-page="/Schedule/Index">
+                                <i class="bi bi-calendar3 me-1"></i> Horários & Aulas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Payments") == true ? "active" : "")" asp-page="/Payments/Index">
+                                <i class="bi bi-cash-coin me-1"></i> Pagamentos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 @(ViewContext.RouteData.Values["page"]?.ToString()?.StartsWith("/Plans") == true ? "active" : "")" asp-page="/Plans/Index">
+                                <i class="bi bi-card-checklist me-1"></i> Planos
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a asp-page="/CheckIn/Index" class="btn btn-sm btn-outline-light fw-semibold px-3">
+                            <i class="bi bi-qr-code-scan me-1 text-danger"></i> Terminal Check-in
+                        </a>
+                        <a asp-page="/Students/Create" class="btn btn-sm btn-danger fw-bold px-3 shadow">
+                            <i class="bi bi-plus-circle me-1"></i> Novo Aluno
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container-fluid px-4 py-4">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top border-secondary border-opacity-25 bg-black py-3 mt-5 text-secondary text-center small">
+        <div class="container-fluid px-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <div>
+                <span class="text-light fw-bold">Nobre Arte Boxe Club</span> &copy; @DateTime.Now.Year - Sistema de Gestão Interna
+            </div>
+            <div>
+                <span class="badge bg-dark border border-secondary text-muted">Versão 1.0 - ASP.NET Core & SQLite</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

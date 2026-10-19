@@ -1,0 +1,80 @@
+@page
+@model BoxeGymManager.Pages.Schedule.IndexModel
+@{
+    ViewData["Title"] = "Grade de Horários & Aulas";
+
+    string GetDayName(DayOfWeek day) => day switch
+    {
+        DayOfWeek.Monday => "Segunda-feira",
+        DayOfWeek.Tuesday => "Terça-feira",
+        DayOfWeek.Wednesday => "Quarta-feira",
+        DayOfWeek.Thursday => "Quinta-feira",
+        DayOfWeek.Friday => "Sexta-feira",
+        DayOfWeek.Saturday => "Sábado",
+        _ => "Domingo"
+    };
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">GRADE DE HORÁRIOS & AULAS</h1>
+        <p class="text-secondary mb-0">Cronograma semanal de treinos, instrutores, ringues e limites de vagas.</p>
+    </div>
+    <div>
+        <a asp-page="/Schedule/Create" class="btn btn-danger fw-bold px-4 py-2">
+            <i class="bi bi-plus-circle me-1"></i> Nova Turma / Horário
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    @foreach (var kvp in Model.ClassesByDay)
+    {
+        var isToday = DateTime.Today.DayOfWeek == kvp.Key;
+        <div class="col-lg-4 col-md-6">
+            <div class="boxing-card p-3 h-100 @(isToday ? "border-danger border-2" : "")">
+                <div class="d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25 pb-2 mb-3">
+                    <h3 class="h5 mb-0 text-white">
+                        <i class="bi bi-calendar2-day text-danger me-2"></i> @GetDayName(kvp.Key)
+                    </h3>
+                    @if (isToday)
+                    {
+                        <span class="badge bg-danger text-uppercase fw-bold">Hoje</span>
+                    }
+                </div>
+
+                @if (kvp.Value.Any())
+                {
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var c in kvp.Value)
+                        {
+                            <div class="schedule-slot">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="fw-bold text-white fs-6">@c.Title</div>
+                                    <span class="badge bg-danger fs-6">@c.StartTime.ToString(@"hh\:mm")</span>
+                                </div>
+                                <div class="small text-secondary mt-1">
+                                    <i class="bi bi-person-badge"></i> Treinador: <span class="text-light">@c.CoachName</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small text-muted mt-2 pt-1 border-top border-secondary border-opacity-25">
+                                    <span><i class="bi bi-geo-alt"></i> @c.RingOrRoom</span>
+                                    <span><i class="bi bi-people"></i> Vagas: @c.MaxCapacity</span>
+                                </div>
+                                <div class="small text-warning mt-1">
+                                    <i class="bi bi-shield"></i> @c.LevelRequirement
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-pause-circle fs-3 d-block mb-1"></i>
+                        Treino livre de saco de pancadas e musculação funcional.
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

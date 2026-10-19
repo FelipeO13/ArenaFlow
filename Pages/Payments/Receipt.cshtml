@@ -1,0 +1,119 @@
+@page "{id:int}"
+@model BoxeGymManager.Pages.Payments.ReceiptModel
+@{
+    ViewData["Title"] = $"Recibo #{Model.Payment.ReceiptCode}";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 no-print">
+    <div>
+        <h1 class="display-6 text-white mb-0">RECIBO DE PAGAMENTO</h1>
+        <p class="text-secondary mb-0">Comprovante financeiro oficial da academia.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button onclick="window.print()" class="btn btn-warning fw-bold text-dark">
+            <i class="bi bi-printer me-1"></i> Imprimir Recibo
+        </button>
+        <a asp-page="./Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Documento de Recibo Imprimível -->
+        <div class="boxing-card p-5 bg-white text-dark shadow-lg rounded" style="border: 2px solid #222;">
+            <!-- Header do Recibo -->
+            <div class="d-flex justify-content-between align-items-center border-bottom border-dark pb-3 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-danger text-white rounded p-2 text-center" style="width: 55px; height: 55px;">
+                        <i class="bi bi-shield-shaded fs-2"></i>
+                    </div>
+                    <div>
+                        <h2 class="mb-0 fw-bold tracking-wide" style="font-family: 'Bebas Neue', sans-serif; letter-spacing: 2px;">
+                            NOBRE ARTE BOXE CLUB
+                        </h2>
+                        <div class="small text-muted">CNPJ: 12.345.678/0001-90 &bull; Tel: (11) 3456-7890</div>
+                        <div class="small text-muted">Rua dos Pugilistas, 100 - Centro de Treinamento Nobre Arte</div>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-danger fs-6 px-3 py-2 text-uppercase">Recibo Nº @Model.Payment.ReceiptCode</span>
+                    <div class="small text-muted mt-1">Emissão: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+                </div>
+            </div>
+
+            <!-- Corpo do Recibo -->
+            <div class="mb-4">
+                <p class="fs-5 mb-3" style="line-height: 1.8;">
+                    Recebemos de <strong class="text-danger">@Model.Payment.Student?.FullName</strong>, 
+                    inscrito(a) sob a Matrícula <strong class="badge bg-dark text-white">@Model.Payment.Student?.RegistrationCode</strong> 
+                    e CPF <strong>@(string.IsNullOrEmpty(Model.Payment.Student?.CPF) ? "Não informado" : Model.Payment.Student?.CPF)</strong>, 
+                    a quantia de:
+                </p>
+
+                <div class="p-3 bg-light rounded text-center border my-3">
+                    <span class="display-5 fw-bold text-success">@Model.Payment.Amount.ToString("C")</span>
+                </div>
+
+                <p class="fs-6 mb-0">
+                    Referente ao pagamento de: <strong>@Model.Payment.ReferenceMonthYear</strong> &bull; 
+                    Plano: <strong>@(Model.Payment.Student?.Plan?.Name ?? "Acesso Avulso / Taxa")</strong>.
+                </p>
+            </div>
+
+            <!-- Detalhes do Pagamento -->
+            <div class="row g-3 border-top border-bottom py-3 mb-4 bg-light small rounded">
+                <div class="col-sm-4">
+                    <strong>Forma de Pagamento:</strong><br />
+                    <span>@Model.Payment.Method</span>
+                </div>
+                <div class="col-sm-4">
+                    <strong>Status:</strong><br />
+                    @if (Model.Payment.Status == BoxeGymManager.Models.PaymentStatus.Pago)
+                    {
+                        <span class="badge bg-success">Liquidado / Pago</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Aguardando Liquidação</span>
+                    }
+                </div>
+                <div class="col-sm-4">
+                    <strong>Data da Liquidação:</strong><br />
+                    <span>@(Model.Payment.PaidDate?.ToString("dd/MM/yyyy HH:mm") ?? "Pendente")</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Payment.Notes))
+            {
+                <div class="small text-muted mb-4">
+                    <strong>Observações:</strong> @Model.Payment.Notes
+                </div>
+            }
+
+            <!-- Assinatura / Carimbo -->
+            <div class="row pt-4 mt-4 border-top border-secondary border-opacity-25 text-center">
+                <div class="col-6">
+                    <div class="border-top border-dark mx-auto pt-2" style="max-width: 200px;">
+                        <small class="text-muted">Assinatura do Atleta</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="border-top border-dark mx-auto pt-2" style="max-width: 200px;">
+                        <small class="text-muted">Nobre Arte Boxe Club</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        body { background: white !important; color: black !important; }
+        .no-print, header, footer { display: none !important; }
+        .container-fluid { padding: 0 !important; }
+        .boxing-card { box-shadow: none !important; border: 1px solid #000 !important; }
+    }
+</style>

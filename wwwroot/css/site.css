@@ -1,0 +1,368 @@
+/* ====================================================================
+   NOBRE ARTE BOXE CLUB - IDENTIDADE VISUAL OFICIAL
+   Cores Principais: Vermelho (#e60026), Preto (#0a0b0e), Branco (#ffffff)
+   ==================================================================== */
+
+:root {
+    /* Cores Principais da Identidade Visual */
+    --boxing-red: #e60026;
+    --boxing-red-hover: #ff1a3d;
+    --boxing-red-active: #cc0022;
+    --boxing-red-subtle: rgba(230, 0, 38, 0.12);
+    --boxing-red-glow: rgba(230, 0, 38, 0.28);
+
+    --boxing-black: #090a0d;
+    --boxing-black-surface: #101216;
+    --boxing-black-card: #14171d;
+    --boxing-black-card-hover: #191d25;
+    
+    --boxing-white: #ffffff;
+    --boxing-text: #f3f4f6;
+    --boxing-text-muted: #9ca3af;
+    --boxing-text-dim: #6b7280;
+
+    --boxing-border: #242832;
+    --boxing-border-light: #323744;
+    --boxing-border-focus: #e60026;
+
+    /* Cores Funcionais de Apoio */
+    --boxing-gold: #f59e0b;
+    --boxing-green: #10b981;
+    --boxing-blue: #3b82f6;
+}
+
+/* ====================================================================
+   Tipografia e Base
+   ==================================================================== */
+body {
+    background-color: var(--boxing-black);
+    color: var(--boxing-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+}
+
+main {
+    flex: 1;
+}
+
+/* Títulos Bebas Neue */
+h1, h2, h3, h4, .heading-bebas, .brand-title {
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+    color: var(--boxing-white);
+}
+
+.brand-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+/* ====================================================================
+   Navegação (Navbar)
+   ==================================================================== */
+.navbar-custom {
+    background-color: #060709 !important;
+    border-bottom: 2px solid var(--boxing-red) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+}
+
+.nav-link {
+    color: #d1d5db !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    padding: 0.5rem 0.85rem !important;
+}
+
+.nav-link:hover {
+    color: var(--boxing-white) !important;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.nav-link.active {
+    color: var(--boxing-white) !important;
+    background-color: var(--boxing-red-subtle);
+    border-bottom: 2px solid var(--boxing-red);
+    font-weight: 700;
+}
+
+/* ====================================================================
+   Cards e Estruturas de Conteúdo
+   ==================================================================== */
+.boxing-card {
+    background-color: var(--boxing-black-card);
+    border: 1px solid var(--boxing-border);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+.boxing-card:hover {
+    border-color: var(--boxing-border-light);
+}
+
+.boxing-card-accent-red {
+    border-top: 3px solid var(--boxing-red) !important;
+}
+
+.boxing-card-accent-white {
+    border-top: 3px solid #e5e7eb !important;
+}
+
+.boxing-card-accent-gold {
+    border-top: 3px solid var(--boxing-gold) !important;
+}
+
+.boxing-card-accent-green {
+    border-top: 3px solid var(--boxing-green) !important;
+}
+
+.boxing-card-accent-blue {
+    border-top: 3px solid var(--boxing-blue) !important;
+}
+
+/* Stat Counters */
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+    color: var(--boxing-white);
+}
+
+/* ====================================================================
+   Controles de Formulário e Entradas (Alta Visibilidade)
+   ==================================================================== */
+.form-control, .form-select {
+    background-color: #12151b !important;
+    border: 1.5px solid #2d3340 !important;
+    color: #ffffff !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.form-control::placeholder {
+    color: #8b93a4 !important;
+    font-weight: 400;
+    opacity: 1;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #161a22 !important;
+    border-color: var(--boxing-red) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.25rem var(--boxing-red-glow) !important;
+    outline: none;
+}
+
+/* Input especial para a Portaria Rápida (Entrada/Saída) */
+.portaria-card {
+    background: linear-gradient(180deg, #161920 0%, #111318 100%);
+    border: 1.5px solid rgba(230, 0, 38, 0.4) !important;
+    border-top: 4px solid var(--boxing-red) !important;
+    box-shadow: 0 8px 30px rgba(230, 0, 38, 0.08), 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.portaria-input {
+    background-color: #0b0c10 !important;
+    border: 1.5px solid #363c4a !important;
+    color: #ffffff !important;
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1rem !important;
+}
+
+.portaria-input::placeholder {
+    color: #8d95a5 !important;
+    font-weight: 400;
+    font-size: 1rem;
+}
+
+.portaria-input:focus {
+    background-color: #101217 !important;
+    border-color: var(--boxing-red) !important;
+    box-shadow: 0 0 0 0.3rem var(--boxing-red-glow) !important;
+}
+
+.portaria-icon {
+    background-color: #181b22 !important;
+    border: 1.5px solid #363c4a !important;
+    border-right: none !important;
+    color: var(--boxing-red) !important;
+    font-size: 1.25rem;
+    padding: 0 1.1rem;
+}
+
+/* ====================================================================
+   Botões Estilizados
+   ==================================================================== */
+.btn {
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    letter-spacing: 0.3px;
+}
+
+.btn-danger {
+    background-color: var(--boxing-red) !important;
+    border-color: var(--boxing-red) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(230, 0, 38, 0.3);
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    background-color: var(--boxing-red-hover) !important;
+    border-color: var(--boxing-red-hover) !important;
+    box-shadow: 0 6px 20px rgba(230, 0, 38, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-danger:active {
+    background-color: var(--boxing-red-active) !important;
+    border-color: var(--boxing-red-active) !important;
+    transform: translateY(0);
+}
+
+.btn-outline-danger {
+    color: var(--boxing-red) !important;
+    border-color: var(--boxing-red) !important;
+    background-color: transparent;
+}
+
+.btn-outline-danger:hover {
+    color: #ffffff !important;
+    background-color: var(--boxing-red) !important;
+    box-shadow: 0 4px 14px rgba(230, 0, 38, 0.3);
+}
+
+.btn-outline-light {
+    color: #e5e7eb !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.btn-outline-light:hover {
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-color: #ffffff !important;
+}
+
+.btn-outline-secondary {
+    color: #9ca3af !important;
+    border-color: #374151 !important;
+}
+
+.btn-outline-secondary:hover {
+    color: #ffffff !important;
+    background-color: #1f2937 !important;
+    border-color: #4b5563 !important;
+}
+
+/* ====================================================================
+   Tabelas
+   ==================================================================== */
+.table-dark-custom {
+    background-color: transparent;
+    color: var(--boxing-text);
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.table-dark-custom th {
+    background-color: #0f1116;
+    color: #9ca3af;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--boxing-border);
+    padding: 14px 16px;
+}
+
+.table-dark-custom td {
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(40, 44, 53, 0.8);
+    vertical-align: middle;
+}
+
+.table-dark-custom tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table-dark-custom tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* ====================================================================
+   Badges e Rótulos
+   ==================================================================== */
+.badge {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+}
+
+.badge-boxing-red {
+    background-color: var(--boxing-red);
+    color: #ffffff;
+}
+
+.badge-boxing-black {
+    background-color: #000000;
+    color: #ffffff;
+    border: 1px solid var(--boxing-border-light);
+}
+
+/* Grade de Aulas (Schedule Slot) */
+.schedule-slot {
+    background-color: #181b22;
+    border: 1px solid var(--boxing-border);
+    border-left: 4px solid var(--boxing-red) !important;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.15s ease;
+}
+
+.schedule-slot:hover {
+    background-color: #1e222b;
+    border-color: var(--boxing-border-light);
+}
+
+/* Links interativos */
+a.hover-red {
+    transition: color 0.15s ease;
+}
+
+a.hover-red:hover {
+    color: var(--boxing-red) !important;
+}
+
+/* Alertas com alto contraste */
+.alert {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Modais estilizados */
+.modal-content {
+    background-color: #121419 !important;
+    border: 1px solid #2d3340;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.modal-header, .modal-footer {
+    border-color: #242832 !important;
+}
