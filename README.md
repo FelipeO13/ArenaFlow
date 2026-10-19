@@ -1,6 +1,6 @@
-# 🥊 Nobre Arte Boxe Club - Sistema de Gestão Interna
+# 🥊 ArenaFlow - Sistema de Gestão para Academias e Centros de Luta
 
-Sistema completo de gerenciamento para academias e centros de treinamento de boxe, desenvolvido em **C# / .NET 8 (ASP.NET Core)** com **Entity Framework Core** e banco de dados **SQLite**.
+Sistema completo de gerenciamento para academias e centros de treinamento de boxe e artes marciais (**Nobre Arte Boxe Club**), desenvolvido em **C# / .NET 8 (ASP.NET Core)** com **Entity Framework Core** e banco de dados **SQLite**.
 
 ---
 
