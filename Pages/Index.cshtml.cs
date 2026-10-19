@@ -23,6 +23,7 @@ public class IndexModel : PageModel
 
     public List<BoxingClass> TodayClasses { get; set; } = new();
     public List<AttendanceLog> RecentAttendances { get; set; } = new();
+    public List<Payment> PendingPayments { get; set; } = new();
 
     [BindProperty]
     public string QuickCode { get; set; } = string.Empty;
@@ -153,6 +154,13 @@ public class IndexModel : PageModel
             .Include(a => a.Student)
             .OrderByDescending(a => a.EntryTime)
             .Take(6)
+            .ToListAsync();
+
+        PendingPayments = await _context.Payments
+            .Include(p => p.Student)
+            .Where(p => p.Status == PaymentStatus.Atrasado || p.Status == PaymentStatus.Pendente)
+            .OrderBy(p => p.DueDate)
+            .Take(4)
             .ToListAsync();
     }
 }

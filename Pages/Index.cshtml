@@ -10,11 +10,8 @@
         <h1 class="text-white mb-0 display-6">PAINEL OPERACIONAL DA ACADEMIA</h1>
         <p class="text-light opacity-75 mb-0">Gestão de atletas, pagamentos e controle de acesso ao ringue.</p>
     </div>
-    <div class="d-flex gap-2">
-        <a asp-page="/CheckIn/Index" class="btn btn-outline-light fw-bold px-3 py-2">
-            <i class="bi bi-door-open me-1 text-danger"></i> Controle de Entrada/Saída
-        </a>
-        <a asp-page="/Students/Create" class="btn btn-danger fw-bold px-3 py-2">
+    <div>
+        <a asp-page="/Students/Create" class="btn btn-danger fw-bold px-3 py-2 shadow-sm">
             <i class="bi bi-person-plus-fill me-1"></i> Matricular Atleta
         </a>
     </div>
@@ -38,10 +35,10 @@
 <div class="row g-3 mb-4">
     <!-- Atletas Ativos -->
     <div class="col-sm-6 col-xl-3">
-        <div class="boxing-card boxing-card-accent-red p-3">
+        <div class="boxing-card boxing-card-accent-neutral p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-light text-uppercase fw-bold small">Atletas Ativos</span>
-                <span class="badge bg-danger bg-opacity-25 text-danger p-2 rounded-circle">
+                <span class="badge bg-secondary bg-opacity-25 text-light p-2 rounded-circle">
                     <i class="bi bi-people-fill fs-5"></i>
                 </span>
             </div>
@@ -52,10 +49,10 @@
 
     <!-- No Ringue / Academia Agora -->
     <div class="col-sm-6 col-xl-3">
-        <div class="boxing-card boxing-card-accent-red p-3">
+        <div class="boxing-card boxing-card-accent-neutral p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-light text-uppercase fw-bold small">Treinando Agora</span>
-                <span class="badge bg-danger bg-opacity-25 text-danger p-2 rounded-circle">
+                <span class="badge bg-secondary bg-opacity-25 text-light p-2 rounded-circle">
                     <i class="bi bi-activity fs-5"></i>
                 </span>
             </div>
@@ -66,10 +63,10 @@
 
     <!-- Check-ins Hoje -->
     <div class="col-sm-6 col-xl-3">
-        <div class="boxing-card boxing-card-accent-white p-3">
+        <div class="boxing-card boxing-card-accent-neutral p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-light text-uppercase fw-bold small">Frequência do Dia</span>
-                <span class="badge bg-light bg-opacity-10 text-white p-2 rounded-circle">
+                <span class="badge bg-secondary bg-opacity-25 text-light p-2 rounded-circle">
                     <i class="bi bi-check2-circle fs-5"></i>
                 </span>
             </div>
@@ -80,18 +77,18 @@
 
     <!-- Faturamento do Mês -->
     <div class="col-sm-6 col-xl-3">
-        <div class="boxing-card boxing-card-accent-green p-3">
+        <div class="boxing-card boxing-card-accent-neutral p-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="text-light text-uppercase fw-bold small">Faturamento (Mês)</span>
-                <span class="badge bg-success bg-opacity-25 text-success p-2 rounded-circle">
+                <span class="badge bg-secondary bg-opacity-25 text-light p-2 rounded-circle">
                     <i class="bi bi-cash-stack fs-5"></i>
                 </span>
             </div>
             <div class="stat-number text-white">@Model.MonthlyRevenue.ToString("C")</div>
-            <div class="small text-secondary">
+            <div class="small">
                 @if (Model.OverduePaymentsCount > 0)
                 {
-                    <span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle"></i> @Model.OverduePaymentsCount pendentes/atrasados</span>
+                    <span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle"></i> @(Model.OverduePaymentsCount == 1 ? "1 pendente/atrasado" : $"{Model.OverduePaymentsCount} pendentes/atrasados")</span>
                 }
                 else
                 {
@@ -109,12 +106,12 @@
         <div class="boxing-card portaria-card p-4 mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h3 class="h5 mb-0 text-white">
-                    <i class="bi bi-shield-check text-danger me-2"></i> Portaria Rápida (Entrada/Saída)
+                    <i class="bi bi-shield-check text-secondary me-2"></i> Portaria Rápida (Entrada/Saída)
                 </h3>
-                <span class="badge bg-danger text-white fw-bold">Recepção</span>
+                <span class="badge bg-secondary bg-opacity-50 text-light fw-semibold">Recepção</span>
             </div>
-            <p class="small text-light mb-3 opacity-75">
-                Digite a <strong class="text-white">matrícula</strong> (ex: <code class="text-white bg-black px-1 py-0.5 rounded border border-secondary">BX-1001</code>) ou <strong class="text-white">CPF</strong> para validar entrada ou saída imediata.
+            <p class="small text-secondary mb-3">
+                Digite a <strong class="text-white">matrícula</strong> (ex: <code class="text-white bg-black px-1.5 py-0.5 rounded border border-secondary">BX-1001</code>) ou <strong class="text-white">CPF</strong> para validar entrada ou saída imediata.
             </p>
             <form method="post" asp-page-handler="QuickCheckIn">
                 <div class="input-group input-group-lg mb-2 shadow-sm">
@@ -133,7 +130,7 @@
         <div class="boxing-card p-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h3 class="h5 mb-0 text-white">
-                    <i class="bi bi-clock-history text-danger me-1"></i> Aulas de Hoje (@DateTime.Today.ToString("dddd, dd/MM"))
+                    <i class="bi bi-clock-history text-secondary me-1"></i> Aulas de Hoje (@DateTime.Today.ToString("dddd, dd/MM"))
                 </h3>
                 <a asp-page="/Schedule/Index" class="btn btn-sm btn-outline-secondary">Ver Grade</a>
             </div>
@@ -151,8 +148,8 @@
                                 </div>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-danger fs-6">@c.StartTime.ToString(@"hh\:mm") - @c.EndTime.ToString(@"hh\:mm")</span>
-                                <div class="small text-muted mt-1">Capacidade: @c.MaxCapacity</div>
+                                <span class="badge bg-dark border border-secondary text-subtle-light fs-6">@c.StartTime.ToString(@"hh\:mm") - @c.EndTime.ToString(@"hh\:mm")</span>
+                                <div class="small text-secondary mt-1"><span class="text-meta-label">Capacidade:</span> @c.MaxCapacity</div>
                             </div>
                         </div>
                     }
@@ -160,9 +157,55 @@
             }
             else
             {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                <div class="text-center py-4 text-secondary">
+                    <i class="bi bi-calendar-x fs-1 d-block mb-2 text-muted"></i>
                     Nenhuma aula programada para hoje. Treino livre de saco e ringue liberado!
+                </div>
+            }
+        </div>
+
+        <!-- Mensalidades a Vencer / Atrasadas (Preenchimento do espaço vazio) -->
+        <div class="boxing-card p-4 mt-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h3 class="h5 mb-0 text-white">
+                    <i class="bi bi-cash-stack text-secondary me-1"></i> Mensalidades Pendentes
+                </h3>
+                <a asp-page="/Payments/Index" class="btn btn-sm btn-outline-secondary">Ver Todas</a>
+            </div>
+
+            @if (Model.PendingPayments.Any())
+            {
+                <div class="d-flex flex-column gap-2">
+                    @foreach (var p in Model.PendingPayments)
+                    {
+                        var isOverdue = p.Status == PaymentStatus.Atrasado || (p.Status == PaymentStatus.Pendente && p.DueDate < DateTime.Today);
+                        <div class="p-2 rounded bg-black bg-opacity-40 border border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold text-white small">@p.Student?.FullName</div>
+                                <div class="text-secondary" style="font-size: 0.8rem;">
+                                    <span class="text-meta-label">Vencimento:</span> <span class="text-subtle-light">@p.DueDate.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold text-white small">@p.Amount.ToString("C")</div>
+                                @if (isOverdue)
+                                {
+                                    <span class="badge bg-danger text-white" style="font-size: 0.72rem;">Atrasado</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary text-light" style="font-size: 0.72rem;">A Vencer</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-3 text-secondary small">
+                    <i class="bi bi-check-circle fs-3 d-block mb-1 text-success"></i>
+                    Nenhuma mensalidade pendente no momento.
                 </div>
             }
         </div>
@@ -173,9 +216,9 @@
         <div class="boxing-card p-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h3 class="h5 mb-0 text-white">
-                    <i class="bi bi-door-open-fill text-primary me-1"></i> Últimas Entradas e Saídas
+                    <i class="bi bi-door-open-fill text-secondary me-1"></i> Últimas Entradas e Saídas
                 </h3>
-                <a asp-page="/CheckIn/Index" class="btn btn-sm btn-outline-danger">Histórico Completo</a>
+                <a asp-page="/CheckIn/Index" class="btn btn-sm btn-outline-secondary">Histórico Completo</a>
             </div>
 
             @if (Model.RecentAttendances.Any())
@@ -197,17 +240,17 @@
                                     <td>
                                         <div class="fw-bold text-white">@item.Student?.FullName</div>
                                         <div class="small text-secondary">
-                                            Matrícula: <span class="badge bg-secondary">@item.Student?.RegistrationCode</span>
+                                            <span class="text-meta-label">Matrícula:</span> <span class="badge bg-dark border border-secondary text-subtle-light">@item.Student?.RegistrationCode</span>
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-info fw-semibold">@item.EntryTime.ToString("HH:mm")</span>
-                                        <div class="small text-muted">@item.EntryTime.ToString("dd/MM")</div>
+                                        <span class="text-white fw-semibold">@item.EntryTime.ToString("HH:mm")</span>
+                                        <div class="small text-secondary">@item.EntryTime.ToString("dd/MM")</div>
                                     </td>
                                     <td>
                                         @if (item.ExitTime.HasValue)
                                         {
-                                            <span class="text-muted fw-semibold">@item.ExitTime.Value.ToString("HH:mm")</span>
+                                            <span class="text-subtle-light fw-semibold">@item.ExitTime.Value.ToString("HH:mm")</span>
                                         }
                                         else
                                         {
@@ -236,8 +279,8 @@
             }
             else
             {
-                <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                <div class="text-center py-4 text-secondary">
+                    <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
                     Nenhum registro de acesso recente.
                 </div>
             }

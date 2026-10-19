@@ -17,9 +17,9 @@
     --boxing-black-card-hover: #191d25;
     
     --boxing-white: #ffffff;
-    --boxing-text: #f3f4f6;
-    --boxing-text-muted: #9ca3af;
-    --boxing-text-dim: #6b7280;
+    --boxing-text: #f8fafc;
+    --boxing-text-muted: #cbd5e1;
+    --boxing-text-dim: #94a3b8;
 
     --boxing-border: #242832;
     --boxing-border-light: #323744;
@@ -125,6 +125,10 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
 
 .boxing-card-accent-blue {
     border-top: 3px solid var(--boxing-blue) !important;
+}
+
+.boxing-card-accent-neutral {
+    border-top: 3px solid #374151 !important;
 }
 
 /* Stat Counters */
@@ -329,7 +333,7 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
 .schedule-slot {
     background-color: #181b22;
     border: 1px solid var(--boxing-border);
-    border-left: 4px solid var(--boxing-red) !important;
+    border-left: 4px solid #4b5563 !important;
     border-radius: 8px;
     padding: 12px 16px;
     transition: all 0.15s ease;
@@ -365,4 +369,25 @@ a.hover-red:hover {
 
 .modal-header, .modal-footer {
     border-color: #242832 !important;
+}
+
+/* ====================================================================
+   Acessibilidade e Contraste (WCAG AA)
+   ==================================================================== */
+.text-secondary {
+    color: #94a3b8 !important; /* Contraste 6.1:1 sobre fundo escuro */
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+.text-subtle-light {
+    color: #cbd5e1 !important; /* Contraste 10.8:1 sobre fundo escuro */
+}
+
+.text-meta-label {
+    color: #cbd5e1 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
