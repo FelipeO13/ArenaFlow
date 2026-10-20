@@ -23,6 +23,7 @@ public class IndexModel : PageModel
 
     public string? AlertMessage { get; set; }
     public string? AlertType { get; set; }
+    public int? BlockedStudentId { get; set; }
 
     public async Task OnGetAsync()
     {
@@ -59,7 +60,7 @@ public class IndexModel : PageModel
 
         // Verificar se já está com entrada em aberto hoje
         var openSession = await _context.AttendanceLogs
-            .Where(a => a.StudentId == student.Id && a.EntryTime >= DateTime.Today && a.ExitTime == null)
+            .Where(a => a.StudentId == student.Id && a.EntryTime >= DateTime.Today && a.ExitTime == null && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente)
             .FirstOrDefaultAsync();
 
         if (openSession != null)
@@ -77,6 +78,7 @@ public class IndexModel : PageModel
         if (!student.IsActive)
         {
             status = AccessStatus.BloqueadoInativo;
+            BlockedStudentId = student.Id;
             if (student.Status == StudentStatus.Trancado)
             {
                 var reasonText = !string.IsNullOrWhiteSpace(student.StatusReason) ? $" (Motivo: {student.StatusReason})" : "";
@@ -99,16 +101,31 @@ public class IndexModel : PageModel
 
             if (hasOverdue || planExpired)
             {
-                status = AccessStatus.AlertaVencimento;
-                message = "ACESSO COM ALERTA: Mensalidade em atraso ou plano vencido!";
+                status = AccessStatus.BloqueadoInadimplente;
+                BlockedStudentId = student.Id;
+                if (hasOverdue && planExpired)
+                {
+                    message = "ACESSO RETIDO: Mensalidade em atraso e plano de treino vencido!";
+                }
+                else if (planExpired)
+                {
+                    message = $"ACESSO RETIDO: Plano de treino vencido em {student.PlanEndDate:dd/MM/yyyy}!";
+                }
+                else
+                {
+                    message = "ACESSO RETIDO: Mensalidade em atraso ou pendente!";
+                }
                 AlertType = "warning";
             }
         }
+
+        var isBlocked = (status == AccessStatus.BloqueadoInativo || status == AccessStatus.BloqueadoInadimplente);
 
         var log = new AttendanceLog
         {
             StudentId = student.Id,
             EntryTime = DateTime.Now,
+            ExitTime = isBlocked ? DateTime.Now : null,
             AccessStatus = status,
             Message = message
         };
@@ -140,6 +157,38 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostOverrideCheckInAsync(int studentId)
+    {
+        var student = await _context.Students.FindAsync(studentId);
+        if (student == null)
+        {
+            AlertMessage = "Atleta não encontrado para liberação.";
+            AlertType = "danger";
+            await LoadDataAsync();
+            return Page();
+        }
+
+        var log = new AttendanceLog
+        {
+            StudentId = student.Id,
+            EntryTime = DateTime.Now,
+            ExitTime = null,
+            AccessStatus = AccessStatus.Autorizado,
+            Message = $"Entrada autorizada em caráter de exceção pela recepção (Situação: {student.Status})"
+        };
+
+        _context.AttendanceLogs.Add(log);
+        await _context.SaveChangesAsync();
+
+        AlertMessage = $"Entrada autorizada em caráter de exceção para {student.FullName} (Matrícula: {student.RegistrationCode})! Bom treino!";
+        AlertType = "success";
+        BlockedStudentId = null;
+        SearchTerm = string.Empty;
+
+        await LoadDataAsync();
+        return Page();
+    }
+
     private async Task LoadDataAsync()
     {
         var today = DateTime.Today;
@@ -147,7 +196,7 @@ public class IndexModel : PageModel
         CurrentlyInGymList = await _context.AttendanceLogs
             .Include(a => a.Student)
                 .ThenInclude(s => s!.Plan)
-            .Where(a => a.EntryTime >= today && a.ExitTime == null)
+            .Where(a => a.EntryTime >= today && a.ExitTime == null && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente)
             .OrderByDescending(a => a.EntryTime)
             .ToListAsync();
 

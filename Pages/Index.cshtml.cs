@@ -30,6 +30,7 @@ public class IndexModel : PageModel
 
     public string? QuickCheckInFeedback { get; set; }
     public string? QuickCheckInStatusClass { get; set; }
+    public int? BlockedStudentId { get; set; }
 
     public async Task OnGetAsync()
     {
@@ -63,7 +64,7 @@ public class IndexModel : PageModel
         // Verificar se já está dentro da academia (saída rápida)
         var today = DateTime.Today;
         var openSession = await _context.AttendanceLogs
-            .Where(a => a.StudentId == student.Id && a.EntryTime >= today && a.ExitTime == null)
+            .Where(a => a.StudentId == student.Id && a.EntryTime >= today && a.ExitTime == null && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente)
             .OrderByDescending(a => a.EntryTime)
             .FirstOrDefaultAsync();
 
@@ -85,8 +86,18 @@ public class IndexModel : PageModel
         if (!student.IsActive)
         {
             status = AccessStatus.BloqueadoInativo;
-            message = "Acesso negado: Matrícula inativa. Procure a recepção.";
+            if (student.Status == StudentStatus.Trancado)
+            {
+                var reason = !string.IsNullOrWhiteSpace(student.StatusReason) ? $" (Motivo: {student.StatusReason})" : "";
+                message = $"Acesso negado: Matrícula trancada temporariamente.{reason}";
+            }
+            else
+            {
+                var reason = !string.IsNullOrWhiteSpace(student.StatusReason) ? $" (Motivo: {student.StatusReason})" : "";
+                message = $"Acesso negado: Matrícula cancelada/inativa.{reason}";
+            }
             QuickCheckInStatusClass = "danger";
+            BlockedStudentId = student.Id;
         }
         else
         {
@@ -98,8 +109,20 @@ public class IndexModel : PageModel
 
             if (hasOverdue || planExpired)
             {
-                status = AccessStatus.AlertaVencimento;
-                message = "Atenção: Mensalidade/Plano vencido! Acesso liberado provisoriamente.";
+                status = AccessStatus.BloqueadoInadimplente;
+                BlockedStudentId = student.Id;
+                if (hasOverdue && planExpired)
+                {
+                    message = "Acesso retido: Mensalidade em atraso e plano de treino vencido!";
+                }
+                else if (planExpired)
+                {
+                    message = $"Acesso retido: Plano de treino vencido em {student.PlanEndDate:dd/MM/yyyy}!";
+                }
+                else
+                {
+                    message = "Acesso retido: Mensalidade em atraso ou pendente!";
+                }
                 QuickCheckInStatusClass = "warning";
             }
             else
@@ -108,10 +131,13 @@ public class IndexModel : PageModel
             }
         }
 
+        var isBlocked = (status == AccessStatus.BloqueadoInativo || status == AccessStatus.BloqueadoInadimplente);
+
         var log = new AttendanceLog
         {
             StudentId = student.Id,
             EntryTime = DateTime.Now,
+            ExitTime = isBlocked ? DateTime.Now : null,
             AccessStatus = status,
             Message = message
         };
@@ -124,6 +150,37 @@ public class IndexModel : PageModel
         return Page();
     }
 
+    public async Task<IActionResult> OnPostOverrideCheckInAsync(int studentId)
+    {
+        var student = await _context.Students.FindAsync(studentId);
+        if (student == null)
+        {
+            QuickCheckInFeedback = "Aluno não localizado para liberação de acesso.";
+            QuickCheckInStatusClass = "danger";
+            await LoadDashboardDataAsync();
+            return Page();
+        }
+
+        var log = new AttendanceLog
+        {
+            StudentId = student.Id,
+            EntryTime = DateTime.Now,
+            ExitTime = null,
+            AccessStatus = AccessStatus.Autorizado,
+            Message = $"Entrada autorizada em caráter de exceção pela recepção (Situação: {student.Status})"
+        };
+
+        _context.AttendanceLogs.Add(log);
+        await _context.SaveChangesAsync();
+
+        QuickCheckInFeedback = $"Entrada liberada com sucesso em caráter de exceção para {student.FullName} ({student.RegistrationCode})! Bom treino!";
+        QuickCheckInStatusClass = "success";
+        BlockedStudentId = null;
+
+        await LoadDashboardDataAsync();
+        return Page();
+    }
+
     private async Task LoadDashboardDataAsync()
     {
         var today = DateTime.Today;
@@ -131,9 +188,11 @@ public class IndexModel : PageModel
 
         TotalActiveStudents = await _context.Students.CountAsync(s => s.IsActive);
         
-        CheckInsToday = await _context.AttendanceLogs.CountAsync(a => a.EntryTime >= today);
+        CheckInsToday = await _context.AttendanceLogs
+            .CountAsync(a => a.EntryTime >= today && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente);
         
-        CurrentlyInGym = await _context.AttendanceLogs.CountAsync(a => a.EntryTime >= today && a.ExitTime == null);
+        CurrentlyInGym = await _context.AttendanceLogs
+            .CountAsync(a => a.EntryTime >= today && a.ExitTime == null && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente);
 
         var monthlyPayments = await _context.Payments
             .Where(p => p.Status == PaymentStatus.Pago && p.PaidDate >= startOfMonth)

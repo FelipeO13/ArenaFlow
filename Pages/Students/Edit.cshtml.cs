@@ -64,6 +64,7 @@ public class EditModel : PageModel
 
         dbStudent.PlanId = Student.PlanId;
         dbStudent.PlanStartDate = Student.PlanStartDate;
+        dbStudent.PlanEndDate = Student.PlanEndDate;
         if (dbStudent.Status != Student.Status)
         {
             dbStudent.Status = Student.Status;

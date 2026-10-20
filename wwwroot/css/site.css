@@ -208,6 +208,18 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
     padding: 0 1.1rem;
 }
 
+.portaria-integrated-bar {
+    background-color: #141720;
+    border: 1px solid #2a303f;
+    border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.portaria-integrated-bar:focus-within {
+    border-color: rgba(230, 0, 38, 0.45);
+    box-shadow: 0 0 16px rgba(230, 0, 38, 0.12);
+}
+
 /* ====================================================================
    Botões Estilizados
    ==================================================================== */
@@ -390,4 +402,18 @@ a.hover-red:hover {
     color: #cbd5e1 !important;
     font-size: 0.85rem;
     font-weight: 500;
+}
+
+/* Item de Mensalidade com Alto Contraste */
+.payment-card-item {
+    background-color: #1a1e27 !important;
+    border: 1px solid #2d3545 !important;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.15s ease;
+}
+
+.payment-card-item:hover {
+    background-color: #212632 !important;
+    border-color: #3f495e !important;
 }

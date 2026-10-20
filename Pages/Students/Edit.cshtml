@@ -24,11 +24,12 @@
     <input type="hidden" asp-for="Student.RegistrationCode" />
 
     <div class="row g-4">
-        <!-- Coluna Esquerda: Dados Pessoais & Emergência -->
-        <div class="col-lg-6">
-            <div class="boxing-card p-4 mb-4">
+        <!-- Coluna Esquerda: Dados Pessoais, Emergência e Situação da Matrícula (2 Cards) -->
+        <div class="col-lg-6 d-flex flex-column gap-4">
+            <!-- Card 1: Dados Cadastrais & Contato de Emergência -->
+            <div class="boxing-card p-4">
                 <h3 class="h5 text-white mb-3">
-                    <i class="bi bi-person-lines-fill text-danger me-2"></i> Dados Cadastrais
+                    <i class="bi bi-person-lines-fill text-secondary me-2"></i> 1. Dados Pessoais & Contato
                 </h3>
 
                 <div class="row g-3">
@@ -62,13 +63,13 @@
                         <input asp-for="Student.Address" class="form-control" />
                     </div>
                 </div>
-            </div>
 
-            <!-- Emergência -->
-            <div class="boxing-card p-4 border-danger border-opacity-50">
-                <h3 class="h5 text-danger mb-3">
-                    <i class="bi bi-telephone-plus me-2"></i> Contato de Emergência
-                </h3>
+                <hr class="border-secondary border-opacity-25 my-4" />
+
+                <!-- Contato de Emergência Integrado -->
+                <h4 class="h6 text-white mb-3">
+                    <i class="bi bi-telephone-plus text-secondary me-2"></i> Contato de Emergência
+                </h4>
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label asp-for="Student.EmergencyContactName" class="form-label text-light small fw-bold">Nome do Contato</label>
@@ -80,13 +81,60 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Card 2: Situação da Matrícula (Ativar / Trancar / Cancelar) -->
+            <div class="boxing-card p-4 border border-secondary flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 text-white mb-0">
+                        <i class="bi bi-person-badge-fill text-secondary me-2"></i> 2. Situação da Matrícula
+                    </h3>
+                    @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
+                    {
+                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Ativo</span>
+                    }
+                    else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
+                    {
+                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-pause-circle-fill me-1"></i> Trancado</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger fs-6"><i class="bi bi-x-circle-fill me-1"></i> Cancelado</span>
+                    }
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Student.Status" class="form-label text-light small fw-bold">Status da Inscrição</label>
+                        <select asp-for="Student.Status" class="form-select form-select-lg fw-bold" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.StudentStatus>()">
+                        </select>
+                        <div class="form-text text-secondary mt-2">
+                            <span class="text-success fw-bold">Ativo:</span> Aluno liberado nos treinos e catraca.<br />
+                            <span class="text-warning fw-bold">Trancado:</span> Pausa temporária (férias, viagem, atestado) sem perder dados.<br />
+                            <span class="text-danger fw-bold">Cancelado:</span> Matrícula encerrada / desistência.
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Student.StatusReason" class="form-label text-light small fw-bold">Motivo / Observação do Status</label>
+                        <input asp-for="Student.StatusReason" class="form-control" placeholder="Ex: Viagem por 30 dias, lesão no ombro, cancelamento a pedido, etc." />
+                    </div>
+
+                    @if (Model.Student.StatusChangedAt.HasValue)
+                    {
+                        <div class="col-12 text-muted small">
+                            <i class="bi bi-clock-history me-1"></i> Última alteração: @Model.Student.StatusChangedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
 
-        <!-- Coluna Direita: Boxe & Plano -->
-        <div class="col-lg-6">
-            <div class="boxing-card p-4 mb-4">
-                <h3 class="h5 text-danger mb-3">
-                    <i class="bi bi-shield-shaded me-2"></i> Ficha de Boxe & Luta
+        <!-- Coluna Direita: Boxe & Plano de Treino (2 Cards) -->
+        <div class="col-lg-6 d-flex flex-column gap-4">
+            <!-- Card 3: Ficha de Boxe & Luta -->
+            <div class="boxing-card p-4">
+                <h3 class="h5 text-white mb-3">
+                    <i class="bi bi-shield-shaded text-secondary me-2"></i> 3. Ficha de Boxe & Luta
                 </h3>
 
                 <div class="row g-3">
@@ -130,10 +178,10 @@
                 </div>
             </div>
 
-            <!-- Plano de Acesso -->
-            <div class="boxing-card p-4 mb-4">
+            <!-- Card 4: Plano de Treino & Vencimento -->
+            <div class="boxing-card p-4 flex-grow-1">
                 <h3 class="h5 text-white mb-3">
-                    <i class="bi bi-card-checklist text-danger me-2"></i> Plano de Treino
+                    <i class="bi bi-card-checklist text-secondary me-2"></i> 4. Plano de Treino
                 </h3>
 
                 <div class="row g-3">
@@ -146,66 +194,34 @@
 
                     <div class="col-md-6">
                         <label asp-for="Student.PlanStartDate" class="form-label text-light small fw-bold">Início do Plano</label>
-                        <input asp-for="Student.PlanStartDate" type="date" class="form-control" />
+                        <input asp-for="Student.PlanStartDate" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
                     </div>
 
                     <div class="col-md-6">
                         <label asp-for="Student.PlanEndDate" class="form-label text-light small fw-bold">Vencimento do Plano</label>
-                        <input asp-for="Student.PlanEndDate" type="date" class="form-control" />
+                        <input asp-for="Student.PlanEndDate" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Situação da Matrícula (Ativar / Trancar / Cancelar) -->
-            <div class="boxing-card p-4 mb-4 border border-secondary">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="h5 text-white mb-0">
-                        <i class="bi bi-person-badge-fill text-danger me-2"></i> Situação da Matrícula
-                    </h3>
-                    @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
-                    {
-                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Ativo</span>
-                    }
-                    else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
-                    {
-                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-pause-circle-fill me-1"></i> Trancado</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger fs-6"><i class="bi bi-x-circle-fill me-1"></i> Cancelado</span>
-                    }
+        <!-- Rodapé de Ações Unificado e Alinhado -->
+        <div class="col-12">
+            <div class="boxing-card p-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <div class="text-secondary small">
+                    <i class="bi bi-shield-check me-1 text-secondary"></i> Alterações de plano ou status afetam imediatamente a catraca e o controle de acesso.
                 </div>
-
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label asp-for="Student.Status" class="form-label text-light small fw-bold">Status da Inscrição</label>
-                        <select asp-for="Student.Status" class="form-select form-select-lg fw-bold" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.StudentStatus>()">
-                        </select>
-                        <div class="form-text text-secondary mt-2">
-                            <span class="text-success fw-bold">Ativo:</span> Aluno liberado nos treinos e catraca.<br />
-                            <span class="text-warning fw-bold">Trancado:</span> Pausa temporária (férias, viagem, atestado médico) sem perder dados.<br />
-                            <span class="text-danger fw-bold">Cancelado:</span> Matrícula encerrada / desistência do aluno.
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <label asp-for="Student.StatusReason" class="form-label text-light small fw-bold">Motivo / Observação do Status</label>
-                        <input asp-for="Student.StatusReason" class="form-control" placeholder="Ex: Viagem por 30 dias, lesão no ombro, cancelamento a pedido, etc." />
-                    </div>
-
-                    @if (Model.Student.StatusChangedAt.HasValue)
-                    {
-                        <div class="col-12 text-muted small">
-                            <i class="bi bi-clock-history me-1"></i> Última alteração de status: @Model.Student.StatusChangedAt.Value.ToString("dd/MM/yyyy HH:mm")
-                        </div>
-                    }
+                <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
+                    <a asp-page="./Details" asp-route-id="@Model.Student.Id" class="btn btn-outline-info px-3">
+                        <i class="bi bi-eye me-1"></i> Ver Ficha
+                    </a>
+                    <a asp-page="./Index" class="btn btn-outline-secondary px-3">
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-danger btn-lg fw-bold text-white px-5 shadow">
+                        <i class="bi bi-save me-2"></i> Salvar Alterações
+                    </button>
                 </div>
-            </div>
-
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-danger btn-lg fw-bold text-white py-3 shadow">
-                    <i class="bi bi-save me-2"></i> Salvar Alterações
-                </button>
             </div>
         </div>
     </div>

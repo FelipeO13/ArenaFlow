@@ -22,6 +22,7 @@ using (var scope = app.Services.CreateScope())
     try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN StatusReason TEXT NOT NULL DEFAULT '';"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN StatusChangedAt TEXT NULL;"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("UPDATE Students SET Status = 2 WHERE IsActive = 0 AND Status = 0;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("UPDATE AttendanceLogs SET ExitTime = EntryTime WHERE AccessStatus IN (2, 3) AND ExitTime IS NULL;"); } catch { }
     AppDbContext.SeedData(dbContext);
 }
 
