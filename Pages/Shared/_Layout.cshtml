@@ -15,8 +15,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <!-- Script de Inicialização Rápida de Tema (Sem FOUC) -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('boxe_gym_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
 </head>
-<body class="bg-dark text-light">
+<body>
     <!-- Navbar Superior -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark navbar-custom py-2 sticky-top shadow">
@@ -68,6 +76,14 @@
                         </li>
                     </ul>
 
+                    <!-- Alternador de Modo Claro / Escuro -->
+                    <div class="d-flex align-items-center gap-2 ms-lg-auto my-2 my-lg-0">
+                        <button id="themeToggleBtn" type="button" class="btn btn-outline-secondary btn-sm px-3 py-1.5 d-flex align-items-center gap-2" title="Alternar entre modo claro e escuro" aria-label="Alternar Tema">
+                            <i class="bi bi-moon-stars-fill theme-icon-dark text-info"></i>
+                            <i class="bi bi-sun-fill theme-icon-light text-warning d-none"></i>
+                            <span id="themeToggleText" class="small fw-semibold">Modo Claro</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>

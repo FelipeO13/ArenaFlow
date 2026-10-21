@@ -53,6 +53,7 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 1.5px;
     color: var(--boxing-white);
+    text-shadow: 0 0 2px rgba(0,0,0,0.4);
 }
 
 .brand-title {
@@ -228,6 +229,12 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
     border-radius: 8px;
     transition: all 0.2s ease;
     letter-spacing: 0.3px;
+    border: 2px solid transparent;
+}
+
+[data-theme="light"] .btn {
+    border-color: var(--boxing-red);
+    box-shadow: 0 0 0 2px var(--boxing-red-subtle);
 }
 
 .btn-danger {
@@ -416,4 +423,307 @@ a.hover-red:hover {
 .payment-card-item:hover {
     background-color: #212632 !important;
     border-color: #3f495e !important;
+}
+
+/* ====================================================================
+   MODO CLARO (LIGHT THEME)
+   Ativado via atributo [data-theme="light"] no <html>
+   Mantém a identidade Nobre Arte (detalhes em vermelho boxe),
+   oferecendo alta legibilidade e conforto visual para recepção/escritório.
+   ==================================================================== */
+[data-theme="light"] {
+    --boxing-black: #f1f4f9;
+    --boxing-black-surface: #ffffff;
+    --boxing-black-card: #ffffff;
+    --boxing-black-card-hover: #f8fafc;
+    --boxing-text: #0f172a;
+    --boxing-text-muted: #64748b;
+    --boxing-text-dim: #94a3b8;
+    --boxing-border: #e2e8f0;
+    --boxing-border-light: #cbd5e1;
+    --boxing-white: #0f172a;
+}
+
+/* Background do Body no modo claro */
+[data-theme="light"] body,
+html[data-theme="light"] body {
+    background-color: #f1f4f9 !important;
+    color: #1e293b !important;
+}
+
+/* Tipografia e Títulos */
+[data-theme="light"] h1,
+[data-theme="light"] h2,
+[data-theme="light"] h3,
+[data-theme="light"] h4,
+[data-theme="light"] h5,
+[data-theme="light"] h6,
+[data-theme="light"] .brand-title,
+[data-theme="light"] .heading-bebas,
+[data-theme="light"] .stat-number {
+    color: #0f172a !important;
+}
+
+/* Textos gerais no modo claro */
+[data-theme="light"] .text-white:not(.btn):not(.btn *):not(.badge):not(.badge *) {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .text-light:not(.btn):not(.btn *):not(.badge):not(.badge *) {
+    color: #334155 !important;
+}
+
+[data-theme="light"] .text-secondary:not(.btn):not(.btn *):not(.badge):not(.badge *),
+[data-theme="light"] .text-muted:not(.btn):not(.btn *):not(.badge):not(.badge *) {
+    color: #64748b !important;
+}
+
+[data-theme="light"] .text-subtle-light:not(.btn):not(.btn *):not(.badge):not(.badge *),
+[data-theme="light"] .text-meta-label {
+    color: #475569 !important;
+}
+
+/* Navbar no Modo Claro */
+[data-theme="light"] .navbar-custom {
+    background-color: #ffffff !important;
+    border-bottom: 2px solid var(--boxing-red) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .navbar-custom .brand-title {
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .navbar-custom .nav-link {
+    color: #475569 !important;
+}
+
+[data-theme="light"] .navbar-custom .nav-link:hover {
+    color: var(--boxing-red) !important;
+    background-color: rgba(230, 0, 38, 0.05) !important;
+}
+
+[data-theme="light"] .navbar-custom .nav-link.active {
+    color: var(--boxing-red) !important;
+    background-color: rgba(230, 0, 38, 0.1) !important;
+    border-bottom: 2px solid var(--boxing-red) !important;
+}
+
+[data-theme="light"] .navbar-toggler {
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .navbar-toggler-icon {
+    filter: invert(0.8);
+}
+
+/* Cards no Modo Claro */
+[data-theme="light"] .boxing-card {
+    background-color: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .boxing-card:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07) !important;
+}
+
+[data-theme="light"] .boxing-card-accent-neutral {
+    border-top: 3px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] .badge.bg-secondary.bg-opacity-25 {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+/* Portaria Rápida no Modo Claro */
+[data-theme="light"] .portaria-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+    border-color: #e2e8f0 !important;
+    border-top: 4px solid var(--boxing-red) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
+}
+
+[data-theme="light"] .portaria-integrated-bar {
+    background-color: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .portaria-integrated-bar:focus-within {
+    border-color: rgba(230, 0, 38, 0.5) !important;
+    box-shadow: 0 0 16px rgba(230, 0, 38, 0.12) !important;
+}
+
+[data-theme="light"] .portaria-icon {
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-right: none !important;
+    color: var(--boxing-red) !important;
+}
+
+[data-theme="light"] .portaria-input {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-left: none !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .portaria-input:focus {
+    background-color: #ffffff !important;
+    border-color: var(--boxing-red) !important;
+}
+
+/* Controles de Formulário e Filtros no Modo Claro */
+[data-theme="light"] .form-control,
+[data-theme="light"] .form-select {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+}
+
+[data-theme="light"] .form-control::placeholder {
+    color: #94a3b8 !important;
+}
+
+[data-theme="light"] .form-control:focus,
+[data-theme="light"] .form-select:focus {
+    background-color: #ffffff !important;
+    border-color: var(--boxing-red) !important;
+    color: #0f172a !important;
+    box-shadow: 0 0 0 0.25rem rgba(230, 0, 38, 0.15) !important;
+}
+
+[data-theme="light"] .bg-black {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .input-group-text.bg-black {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Tabelas no Modo Claro */
+[data-theme="light"] .table-dark-custom th {
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .table-dark-custom td {
+    color: #1e293b !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .table-dark-custom tbody tr:hover {
+    background-color: #f8fafc !important;
+}
+
+/* Aulas de Hoje (Schedule Slots) */
+[data-theme="light"] .schedule-slot {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-left: 4px solid var(--boxing-red) !important;
+}
+
+[data-theme="light"] .schedule-slot:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Mensalidades Pendentes */
+[data-theme="light"] .payment-card-item {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+[data-theme="light"] .payment-card-item:hover {
+    background-color: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+}
+
+/* Badges e Tags no Modo Claro */
+[data-theme="light"] .badge.bg-dark {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .badge.bg-secondary:not(.bg-opacity-25) {
+    background-color: #e2e8f0 !important;
+    color: #334155 !important;
+}
+
+/* Botões Outline no Modo Claro */
+[data-theme="light"] .btn-outline-secondary {
+    color: #475569 !important;
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .btn-outline-secondary:hover {
+    color: #ffffff !important;
+    background-color: #475569 !important;
+    border-color: #475569 !important;
+}
+
+[data-theme="light"] .btn-outline-light {
+    color: #334155 !important;
+    border-color: #cbd5e1 !important;
+}
+
+[data-theme="light"] .btn-outline-light:hover {
+    color: #0f172a !important;
+    background-color: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+}
+
+/* Rodapé no Modo Claro */
+[data-theme="light"] footer {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #64748b !important;
+}
+
+[data-theme="light"] footer .text-light {
+    color: #0f172a !important;
+}
+
+/* Modais e Menus Suspensos no Modo Claro */
+[data-theme="light"] .modal-content {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-theme="light"] .modal-header,
+[data-theme="light"] .modal-footer {
+    border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .dropdown-menu-dark {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-theme="light"] .dropdown-menu-dark .dropdown-item {
+    color: #334155 !important;
+}
+
+[data-theme="light"] .dropdown-menu-dark .dropdown-item:hover {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+/* Código em destaque */
+[data-theme="light"] code {
+    background-color: #f1f5f9 !important;
+    color: var(--boxing-red) !important;
+    border-color: #cbd5e1 !important;
 }
