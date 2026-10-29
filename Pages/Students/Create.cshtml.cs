@@ -49,12 +49,53 @@ public class CreateModel : PageModel
             return Page();
         }
 
+        // Validação de CNH (opcional, mas deve ter 11 dígitos se preenchida)
+        if (!string.IsNullOrWhiteSpace(Student.CNH))
+        {
+            var cnhDigits = System.Text.RegularExpressions.Regex.Replace(Student.CNH.Trim(), @"\D", "");
+            if (cnhDigits.Length != 11)
+            {
+                ModelState.AddModelError("Student.CNH", "A CNH deve conter exatamente 11 dígitos numéricos.");
+            }
+            else
+            {
+                Student.CNH = cnhDigits;
+            }
+        }
+        else
+        {
+            Student.CNH = null;
+        }
+
+        // Validação de Filiação para menores de 18 anos
+        if (Student.IsUnderage)
+        {
+            if (string.IsNullOrWhiteSpace(Student.GuardianName))
+            {
+                ModelState.AddModelError("Student.GuardianName", "Nome do pai, mãe ou responsável é obrigatório para menores de 18 anos.");
+            }
+            if (string.IsNullOrWhiteSpace(Student.GuardianPhone))
+            {
+                ModelState.AddModelError("Student.GuardianPhone", "Telefone do responsável é obrigatório para menores de 18 anos.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await LoadPlansAsync();
+            return Page();
+        }
+
         Student.FullName = Student.FullName.Trim();
         Student.RegistrationCode = Student.RegistrationCode.Trim();
         Student.CPF = Student.CPF?.Trim() ?? string.Empty;
         Student.Phone = Student.Phone?.Trim() ?? string.Empty;
         Student.Email = Student.Email?.Trim() ?? string.Empty;
         Student.Address = Student.Address?.Trim() ?? string.Empty;
+        Student.GuardianName = string.IsNullOrWhiteSpace(Student.GuardianName) ? null : Student.GuardianName.Trim();
+        Student.GuardianPhone = string.IsNullOrWhiteSpace(Student.GuardianPhone) ? null : Student.GuardianPhone.Trim();
+        Student.GuardianAddress = string.IsNullOrWhiteSpace(Student.GuardianAddress) ? null : Student.GuardianAddress.Trim();
+        Student.ModalityNotes = string.IsNullOrWhiteSpace(Student.ModalityNotes) ? null : Student.ModalityNotes.Trim();
         Student.EmergencyContactName = Student.EmergencyContactName?.Trim() ?? string.Empty;
         Student.EmergencyContactPhone = Student.EmergencyContactPhone?.Trim() ?? string.Empty;
         Student.MedicalNotes = Student.MedicalNotes?.Trim() ?? string.Empty;

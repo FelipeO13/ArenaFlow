@@ -22,6 +22,7 @@
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <h1 class="display-6 text-white mb-0">@Model.Student.FullName</h1>
                 <span class="badge bg-danger fs-6">@Model.Student.RegistrationCode</span>
+                <span class="badge bg-warning text-dark fs-6"><i class="bi bi-trophy-fill me-1"></i> @Model.Student.Modality</span>
                 @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
                 {
                     <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Matrícula Ativa</span>
@@ -144,18 +145,25 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
 }
 
 <div class="row g-4">
-    <!-- Coluna Esquerda: Ficha de Boxe & Informações Médicas -->
+    <!-- Coluna Esquerda: Ficha Técnica, Plano & Emergência -->
     <div class="col-lg-4">
-        <!-- Cartão Ficha Técnica de Luta -->
+        <!-- Cartão Ficha Técnica -->
         <div class="boxing-card boxing-card-accent-red p-4 mb-4">
-            <h3 class="h5 text-danger mb-3">
-                <i class="bi bi-trophy-fill me-2"></i> Perfil no Boxe
-            </h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 text-danger mb-0">
+                    <i class="bi bi-shield-shaded me-2"></i> Ficha Técnica
+                </h3>
+                <span class="badge bg-danger">@Model.Student.Modality</span>
+            </div>
             
             <div class="d-flex flex-column gap-3">
                 <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Nível de Boxe:</span>
-                    <span class="badge bg-warning text-dark fw-bold">@Model.Student.ExperienceLevel</span>
+                    <span class="text-secondary">Modalidade:</span>
+                    <span class="badge bg-warning text-dark fw-bold">@Model.Student.Modality</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary">Nível Esportivo:</span>
+                    <span class="badge bg-dark border border-secondary text-warning fw-bold">@Model.Student.ExperienceLevel</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary">Base (Stance):</span>
@@ -170,6 +178,14 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                     <span class="text-info fw-bold">@Model.Student.WeightCategory</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary">Altura:</span>
+                    <span class="text-white fw-bold">@(Model.Student.HeightCm.HasValue ? $"{Model.Student.HeightCm} cm" : "Não informada")</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary">Envergadura:</span>
+                    <span class="text-white fw-bold">@(Model.Student.ReachCm.HasValue ? $"{Model.Student.ReachCm} cm" : "Não informada")</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary">Atestado Médico:</span>
                     @if (Model.Student.HasMedicalCertificate)
                     {
@@ -182,6 +198,14 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                 </div>
             </div>
 
+            @if (!string.IsNullOrEmpty(Model.Student.ModalityNotes))
+            {
+                <div class="mt-3 p-3 bg-dark rounded border border-danger border-opacity-50">
+                    <div class="text-danger small fw-bold mb-1"><i class="bi bi-info-circle me-1"></i> Informações da Modalidade:</div>
+                    <div class="small text-light">@Model.Student.ModalityNotes</div>
+                </div>
+            }
+
             @if (!string.IsNullOrEmpty(Model.Student.MedicalNotes))
             {
                 <div class="mt-3 p-3 bg-dark rounded border border-secondary border-opacity-50">
@@ -191,7 +215,7 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
             }
         </div>
 
-        <!-- Plano e Contato de Emergência -->
+        <!-- Plano Atual -->
         <div class="boxing-card p-4 mb-4">
             <h3 class="h5 text-warning mb-3">
                 <i class="bi bi-card-checklist me-2"></i> Plano Atual
@@ -230,8 +254,83 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
         </div>
     </div>
 
-    <!-- Coluna Direita: Histórico Financeiro & Frequência de Treinos -->
+    <!-- Coluna Direita: Dados Pessoais & Filiação, Histórico Financeiro & Frequência de Treinos -->
     <div class="col-lg-8">
+        <!-- Cartão Dados Pessoais & Filiação -->
+        <div class="boxing-card p-4 mb-4">
+            <h3 class="h5 text-white mb-3">
+                <i class="bi bi-person-lines-fill text-danger me-2"></i> Dados Pessoais & Filiação
+            </h3>
+
+            <div class="row g-3">
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Nome Completo:</span>
+                    <span class="text-white fw-bold">@Model.Student.FullName</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Data de Nascimento / Idade:</span>
+                    <span class="text-white fw-bold">
+                        @Model.Student.BirthDate.ToString("dd/MM/yyyy")
+                        <span class="badge @(Model.Student.IsUnderage ? "bg-warning text-dark" : "bg-secondary") ms-1">
+                            @Model.Student.Age anos @(Model.Student.IsUnderage ? "(Menor de idade)" : "")
+                        </span>
+                    </span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">CPF:</span>
+                    <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.CPF) ? Model.Student.CPF : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">CNH:</span>
+                    <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.CNH) ? Model.Student.CNH : "Não informada")</span>
+                </div>
+
+                @if (Model.Student.IsUnderage || !string.IsNullOrWhiteSpace(Model.Student.GuardianName))
+                {
+                    <div class="col-12 mt-2">
+                        <div class="p-3 bg-dark rounded border border-warning border-opacity-50">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-warning small">
+                                    <i class="bi bi-shield-exclamation me-1"></i> Filiação / Responsável Legal
+                                </span>
+                                @if (Model.Student.IsUnderage)
+                                {
+                                    <span class="badge bg-warning text-dark small">Aluno Menor</span>
+                                }
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <span class="text-secondary small d-block">Responsável:</span>
+                                    <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianName) ? Model.Student.GuardianName : "Não informado")</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="text-secondary small d-block">Telefone do Responsável:</span>
+                                    <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianPhone) ? Model.Student.GuardianPhone : "Não informado")</span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="text-secondary small d-block">Endereço do Responsável:</span>
+                                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianAddress) ? Model.Student.GuardianAddress : "Mesmo do aluno / Não informado")</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <div class="col-12 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Endereço Completo:</span>
+                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.Address) ? Model.Student.Address : "Não informado")</span>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-secondary small d-block">E-mail:</span>
+                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.Email) ? Model.Student.Email : "Não informado")</span>
+                </div>
+                <div class="col-md-6">
+                    <span class="text-secondary small d-block">Telefone / WhatsApp:</span>
+                    <span class="text-white fw-bold">@Model.Student.Phone</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Histórico de Mensalidades -->
         <div class="boxing-card p-4 mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">

@@ -22,6 +22,14 @@ using (var scope = app.Services.CreateScope())
     try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN StatusReason TEXT NOT NULL DEFAULT '';"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN StatusChangedAt TEXT NULL;"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN PhotoPath TEXT NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN Modality INTEGER NOT NULL DEFAULT 0;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN CNH TEXT NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN GuardianName TEXT NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN GuardianPhone TEXT NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN GuardianAddress TEXT NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN HeightCm INTEGER NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN ReachCm INTEGER NULL;"); } catch { }
+    try { dbContext.Database.ExecuteSqlRaw("ALTER TABLE Students ADD COLUMN ModalityNotes TEXT NULL;"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("UPDATE Students SET Status = 2 WHERE IsActive = 0 AND Status = 0;"); } catch { }
     try { dbContext.Database.ExecuteSqlRaw("UPDATE AttendanceLogs SET ExitTime = EntryTime WHERE AccessStatus IN (2, 3) AND ExitTime IS NULL;"); } catch { }
     AppDbContext.SeedData(dbContext);

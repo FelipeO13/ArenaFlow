@@ -7,7 +7,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="display-6 text-white mb-0">MATRÍCULA DE NOVO ATLETA</h1>
-        <p class="text-secondary mb-0">Cadastre os dados pessoais, ficha esportiva de boxe e plano de acesso.</p>
+        <p class="text-secondary mb-0">Cadastre os dados pessoais, modalidade, ficha esportiva e plano de acesso.</p>
     </div>
     <a asp-page="./Index" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i> Voltar à Lista
@@ -16,56 +16,119 @@
 
 <form method="post">
     <div class="row g-4">
-        <!-- Coluna Esquerda: Dados Pessoais & Contato de Emergência (2 Cards) -->
+        <!-- 1) MODALIDADE (primeiro campo do formulário, obrigatório) -->
+        <div class="col-12">
+            <div class="boxing-card p-4 border border-danger border-opacity-50">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h3 class="h5 text-white mb-0">
+                        <i class="bi bi-trophy-fill text-danger me-2"></i> 1. Modalidade Esportiva
+                    </h3>
+                    <span class="badge bg-danger">Obrigatório</span>
+                </div>
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <label asp-for="Student.Modality" class="form-label text-light small fw-bold">Modalidade</label>
+                        <select asp-for="Student.Modality" class="form-select form-select-lg fw-bold bg-dark text-white border-danger" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.SportModality>()" required>
+                        </select>
+                        <div class="form-text text-secondary">Boxe, Jiu-Jitsu ou Muay Thai (expansível para novas modalidades).</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Student.RegistrationCode" class="form-label text-light small fw-bold">Matrícula Gerada</label>
+                        <input asp-for="Student.RegistrationCode" class="form-control text-danger fw-bold form-control-lg" required />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2) DADOS PESSOAIS & CONTATO DE EMERGÊNCIA -->
         <div class="col-lg-6 d-flex flex-column gap-4">
-            <!-- 1. Dados Cadastrais -->
+            <!-- Dados Pessoais (ordem: Nome, data de nascimento, CPF, CNH, filiação, endereço, e-mail, telefone) -->
             <div class="boxing-card p-4">
                 <h3 class="h5 text-white mb-3">
-                    <i class="bi bi-person-lines-fill text-secondary me-2"></i> 1. Dados Pessoais & Contato
+                    <i class="bi bi-person-lines-fill text-secondary me-2"></i> 2. Dados Pessoais
                 </h3>
 
                 <div class="row g-3">
-                    <div class="col-md-4">
-                        <label asp-for="Student.RegistrationCode" class="form-label text-light small fw-bold">Matrícula</label>
-                        <input asp-for="Student.RegistrationCode" class="form-control text-danger fw-bold" required />
-                    </div>
-
-                    <div class="col-md-8">
+                    <!-- Nome -->
+                    <div class="col-12">
                         <label asp-for="Student.FullName" class="form-label text-light small fw-bold">Nome Completo</label>
                         <input asp-for="Student.FullName" class="form-control" placeholder="Ex: Rodrigo 'Navalha' Silva" required />
+                        <span asp-validation-for="Student.FullName" class="text-danger small"></span>
                     </div>
 
+                    <!-- Data de Nascimento -->
+                    <div class="col-md-6">
+                        <label asp-for="Student.BirthDate" class="form-label text-light small fw-bold">Data de Nascimento</label>
+                        <input asp-for="Student.BirthDate" id="birthDateInput" type="date" class="form-control" required />
+                        <span asp-validation-for="Student.BirthDate" class="text-danger small"></span>
+                    </div>
+
+                    <!-- CPF -->
                     <div class="col-md-6">
                         <label asp-for="Student.CPF" class="form-label text-light small fw-bold">CPF</label>
                         <input asp-for="Student.CPF" class="form-control" placeholder="000.000.000-00" />
+                        <span asp-validation-for="Student.CPF" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <label asp-for="Student.BirthDate" class="form-label text-light small fw-bold">Data de Nascimento</label>
-                        <input asp-for="Student.BirthDate" type="date" class="form-control" />
+                    <!-- CNH (opcional, 11 dígitos) -->
+                    <div class="col-12">
+                        <label asp-for="Student.CNH" class="form-label text-light small fw-bold">CNH <span class="text-secondary fw-normal">(opcional)</span></label>
+                        <input asp-for="Student.CNH" class="form-control" placeholder="Ex: 12345678901 (11 dígitos numéricos)" maxlength="14" />
+                        <span asp-validation-for="Student.CNH" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <label asp-for="Student.Phone" class="form-label text-light small fw-bold">Telefone / WhatsApp</label>
-                        <input asp-for="Student.Phone" class="form-control" placeholder="(11) 99999-9999" required />
+                    <!-- Filiação (exibido e exigido apenas para menores de 18 anos) -->
+                    <div class="col-12" id="guardianSection" style="display: none;">
+                        <div class="p-3 bg-dark rounded border border-warning border-opacity-75">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold text-warning small">
+                                    <i class="bi bi-shield-exclamation me-1"></i> Filiação / Responsável Legal (Aluno Menor de Idade)
+                                </span>
+                                <span class="badge bg-warning text-dark">Obrigatório para &lt; 18 anos</span>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label asp-for="Student.GuardianName" class="form-label text-light small fw-bold">Nome do Pai, Mãe ou Responsável</label>
+                                    <input asp-for="Student.GuardianName" id="guardianNameInput" class="form-control" placeholder="Nome completo do responsável" />
+                                    <span asp-validation-for="Student.GuardianName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="Student.GuardianPhone" class="form-label text-light small fw-bold">Telefone do Responsável</label>
+                                    <input asp-for="Student.GuardianPhone" id="guardianPhoneInput" class="form-control" placeholder="(11) 98888-8888" />
+                                    <span asp-validation-for="Student.GuardianPhone" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="Student.GuardianAddress" class="form-label text-light small fw-bold">Endereço do Responsável <span class="text-secondary fw-normal">(opcional)</span></label>
+                                    <input asp-for="Student.GuardianAddress" class="form-control" placeholder="Rua, número, bairro (se diferente do aluno)" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Endereço -->
+                    <div class="col-12">
+                        <label asp-for="Student.Address" class="form-label text-light small fw-bold">Endereço Completo</label>
+                        <input asp-for="Student.Address" class="form-control" placeholder="Rua, número, bairro, cidade" />
+                    </div>
+
+                    <!-- E-mail -->
                     <div class="col-md-6">
                         <label asp-for="Student.Email" class="form-label text-light small fw-bold">E-mail</label>
                         <input asp-for="Student.Email" type="email" class="form-control" placeholder="atleta@email.com" />
                     </div>
 
-                    <div class="col-12">
-                        <label asp-for="Student.Address" class="form-label text-light small fw-bold">Endereço Completo</label>
-                        <input asp-for="Student.Address" class="form-control" placeholder="Rua, número, bairro, cidade" />
+                    <!-- Telefone -->
+                    <div class="col-md-6">
+                        <label asp-for="Student.Phone" class="form-label text-light small fw-bold">Telefone / WhatsApp</label>
+                        <input asp-for="Student.Phone" class="form-control" placeholder="(11) 99999-9999" required />
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Contato de Emergência -->
+            <!-- Contato de Emergência -->
             <div class="boxing-card p-4 border border-secondary border-opacity-50 flex-grow-1">
                 <h3 class="h5 text-white mb-3">
-                    <i class="bi bi-telephone-plus text-secondary me-2"></i> 2. Contato de Emergência
+                    <i class="bi bi-telephone-plus text-secondary me-2"></i> Contato de Emergência
                 </h3>
                 <p class="text-secondary small mb-3">Pessoa autorizada a ser contatada em caso de urgência durante treinos ou sparrings.</p>
                 <div class="row g-3">
@@ -81,12 +144,12 @@
             </div>
         </div>
 
-        <!-- Coluna Direita: Ficha Técnica de Boxe & Plano de Acesso (2 Cards) -->
+        <!-- 3) FICHA TÉCNICA & PLANO DE ACESSO -->
         <div class="col-lg-6 d-flex flex-column gap-4">
-            <!-- 3. Ficha Técnica de Boxe -->
+            <!-- Ficha Técnica -->
             <div class="boxing-card p-4">
                 <h3 class="h5 text-white mb-3">
-                    <i class="bi bi-shield-shaded text-secondary me-2"></i> 3. Ficha Técnica de Boxe
+                    <i class="bi bi-shield-shaded text-secondary me-2"></i> 3. Ficha Técnica
                 </h3>
 
                 <div class="row g-3">
@@ -100,8 +163,19 @@
                         <input asp-for="Student.WeightCategory" class="form-control" placeholder="Ex: Peso Médio (ou automático)" />
                     </div>
 
+                    <!-- Novos campos: Altura e Envergadura -->
                     <div class="col-md-6">
-                        <label asp-for="Student.ExperienceLevel" class="form-label text-light small fw-bold">Nível no Boxe</label>
+                        <label asp-for="Student.HeightCm" class="form-label text-light small fw-bold">Altura (cm) <span class="text-secondary fw-normal">(opcional)</span></label>
+                        <input asp-for="Student.HeightCm" type="number" step="1" class="form-control" placeholder="Ex: 178" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.ReachCm" class="form-label text-light small fw-bold">Envergadura (cm) <span class="text-secondary fw-normal">(opcional)</span></label>
+                        <input asp-for="Student.ReachCm" type="number" step="1" class="form-control" placeholder="Ex: 182" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Student.ExperienceLevel" class="form-label text-light small fw-bold">Nível Esportivo</label>
                         <select asp-for="Student.ExperienceLevel" class="form-select" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.BoxingLevel>()"></select>
                     </div>
 
@@ -112,6 +186,12 @@
                             <option value="Canhoto (Southpaw)">Canhoto (Southpaw)</option>
                             <option value="Ambidestro (Switch)">Ambidestro (Switch)</option>
                         </select>
+                    </div>
+
+                    <!-- Novo campo: Informações da modalidade (textarea livre) -->
+                    <div class="col-12">
+                        <label asp-for="Student.ModalityNotes" class="form-label text-light small fw-bold">Informações da Modalidade <span class="text-secondary fw-normal">(opcional)</span></label>
+                        <textarea asp-for="Student.ModalityNotes" class="form-control" rows="2" placeholder="Anotações gerais da modalidade (graduação, tempo de treino, estilo, etc.)"></textarea>
                     </div>
 
                     <div class="col-12">
@@ -130,7 +210,7 @@
                 </div>
             </div>
 
-            <!-- 4. Associação de Plano -->
+            <!-- Associação de Plano -->
             <div class="boxing-card p-4 flex-grow-1">
                 <h3 class="h5 text-white mb-3">
                     <i class="bi bi-card-checklist text-secondary me-2"></i> 4. Plano & Mensalidade
@@ -165,7 +245,7 @@
         <div class="col-12">
             <div class="boxing-card p-3 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
                 <div class="text-secondary small">
-                    <i class="bi bi-shield-check me-1 text-secondary"></i> O código de matrícula e os planos poderão ser reajustados a qualquer momento na edição do atleta.
+                    <i class="bi bi-shield-check me-1 text-secondary"></i> O código de matrícula, modalidade e planos poderão ser reajustados a qualquer momento na edição do atleta.
                 </div>
                 <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
                     <a asp-page="./Index" class="btn btn-outline-secondary px-4 fw-semibold">
@@ -179,3 +259,48 @@
         </div>
     </div>
 </form>
+
+@section Scripts {
+    <script>
+        function updateGuardianVisibility() {
+            const birthInput = document.getElementById('birthDateInput');
+            const guardianSec = document.getElementById('guardianSection');
+            const guardianName = document.getElementById('guardianNameInput');
+            const guardianPhone = document.getElementById('guardianPhoneInput');
+
+            if (!birthInput || !guardianSec) return;
+
+            if (!birthInput.value) {
+                guardianSec.style.display = 'none';
+                if (guardianName) guardianName.removeAttribute('required');
+                if (guardianPhone) guardianPhone.removeAttribute('required');
+                return;
+            }
+
+            const parts = birthInput.value.split('-');
+            if (parts.length === 3) {
+                const birthDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                if (age < 18) {
+                    guardianSec.style.display = 'block';
+                    if (guardianName) guardianName.setAttribute('required', 'required');
+                    if (guardianPhone) guardianPhone.setAttribute('required', 'required');
+                } else {
+                    guardianSec.style.display = 'none';
+                    if (guardianName) guardianName.removeAttribute('required');
+                    if (guardianPhone) guardianPhone.removeAttribute('required');
+                }
+            }
+        }
+
+        document.getElementById('birthDateInput')?.addEventListener('change', updateGuardianVisibility);
+        document.getElementById('birthDateInput')?.addEventListener('input', updateGuardianVisibility);
+        document.addEventListener('DOMContentLoaded', updateGuardianVisibility);
+    </script>
+}

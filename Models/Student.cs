@@ -1,4 +1,18 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace BoxeGymManager.Models;
+
+public enum SportModality
+{
+    [Display(Name = "Boxe")]
+    Boxe = 0,
+
+    [Display(Name = "Jiu-Jitsu")]
+    JiuJitsu = 1,
+
+    [Display(Name = "Muay Thai")]
+    MuayThai = 2
+}
 
 public enum BoxingLevel
 {
@@ -31,23 +45,51 @@ public class Student
     private string _medicalNotes = string.Empty;
 
     public int Id { get; set; }
+
+    // Modalidade Esportiva
+    public SportModality Modality { get; set; } = SportModality.Boxe;
+
     public string RegistrationCode { get => _registrationCode; set => _registrationCode = value ?? string.Empty; }
     public string FullName { get => _fullName; set => _fullName = value ?? string.Empty; }
     public string CPF { get => _cpf; set => _cpf = value ?? string.Empty; }
     public DateTime BirthDate { get; set; }
+    public string? CNH { get; set; }
+
+    // Filiação / Responsável Legal (obrigatório se menor de 18 anos)
+    public string? GuardianName { get; set; }
+    public string? GuardianPhone { get; set; }
+    public string? GuardianAddress { get; set; }
+
     public string Phone { get => _phone; set => _phone = value ?? string.Empty; }
     public string Email { get => _email; set => _email = value ?? string.Empty; }
     public string Address { get => _address; set => _address = value ?? string.Empty; }
+
+    // Cálculo de idade
+    public int Age
+    {
+        get
+        {
+            var today = DateTime.Today;
+            var age = today.Year - BirthDate.Year;
+            if (BirthDate.Date > today.AddYears(-age)) age--;
+            return age;
+        }
+    }
+
+    public bool IsUnderage => Age < 18;
 
     // Ficha de Contato de Emergência
     public string EmergencyContactName { get => _emergencyContactName; set => _emergencyContactName = value ?? string.Empty; }
     public string EmergencyContactPhone { get => _emergencyContactPhone; set => _emergencyContactPhone = value ?? string.Empty; }
 
-    // Ficha Técnica de Boxe
+    // Ficha Técnica Esportiva
     public decimal WeightKg { get; set; }
     public string WeightCategory { get => _weightCategory; set => _weightCategory = value ?? string.Empty; }
     public BoxingLevel ExperienceLevel { get; set; } = BoxingLevel.Iniciante;
     public string Stance { get => _stance; set => _stance = string.IsNullOrWhiteSpace(value) ? "Destro (Orthodox)" : value; }
+    public int? HeightCm { get; set; }
+    public int? ReachCm { get; set; }
+    public string? ModalityNotes { get; set; }
     public string MedicalNotes { get => _medicalNotes; set => _medicalNotes = value ?? string.Empty; }
     public bool HasMedicalCertificate { get; set; } = true;
     public string? PhotoPath { get; set; }

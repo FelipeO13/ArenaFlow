@@ -68,6 +68,11 @@ public class AppDbContext : DbContext
                 entry.Entity.WeightCategory ??= string.Empty;
                 entry.Entity.MedicalNotes ??= string.Empty;
                 entry.Entity.StatusReason ??= string.Empty;
+                if (!string.IsNullOrWhiteSpace(entry.Entity.CNH)) entry.Entity.CNH = entry.Entity.CNH.Trim();
+                if (!string.IsNullOrWhiteSpace(entry.Entity.GuardianName)) entry.Entity.GuardianName = entry.Entity.GuardianName.Trim();
+                if (!string.IsNullOrWhiteSpace(entry.Entity.GuardianPhone)) entry.Entity.GuardianPhone = entry.Entity.GuardianPhone.Trim();
+                if (!string.IsNullOrWhiteSpace(entry.Entity.GuardianAddress)) entry.Entity.GuardianAddress = entry.Entity.GuardianAddress.Trim();
+                if (!string.IsNullOrWhiteSpace(entry.Entity.ModalityNotes)) entry.Entity.ModalityNotes = entry.Entity.ModalityNotes.Trim();
                 if (string.IsNullOrWhiteSpace(entry.Entity.Stance)) entry.Entity.Stance = "Destro (Orthodox)";
             }
         }
