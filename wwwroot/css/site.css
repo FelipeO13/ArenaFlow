@@ -520,17 +520,17 @@ html[data-theme="light"] body {
 /* Cards no Modo Claro */
 [data-theme="light"] .boxing-card {
     background-color: #ffffff !important;
-    border: 2px solid #e2e8f0 !important;
+    border: 2px solid #b0b8c0 !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 [data-theme="light"] .boxing-card:hover {
-    border-color: #cbd5e1 !important;
+    border-color: #8a929e !important;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07) !important;
 }
 
 [data-theme="light"] .boxing-card-accent-neutral {
-    border-top: 3px solid #cbd5e1 !important;
+    border-top: 3px solid #8a929e !important;
 }
 
 [data-theme="light"] .badge.bg-secondary.bg-opacity-25 {
@@ -541,14 +541,14 @@ html[data-theme="light"] body {
 /* Portaria Rápida no Modo Claro */
 [data-theme="light"] .portaria-card {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
-    border-color: #e2e8f0 !important;
+    border-color: #b0b8c0 !important;
     border-top: 4px solid var(--boxing-red) !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
 }
 
 [data-theme="light"] .portaria-integrated-bar {
     background-color: #f8fafc !important;
-    border-color: #e2e8f0 !important;
+    border-color: #b0b8c0 !important;
 }
 
 [data-theme="light"] .portaria-integrated-bar:focus-within {
@@ -579,12 +579,12 @@ html[data-theme="light"] body {
 [data-theme="light"] .form-control,
 [data-theme="light"] .form-select {
     background-color: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
+    border: 1.5px solid #8a929e !important;
     color: #0f172a !important;
 }
 
 [data-theme="light"] .form-control::placeholder {
-    color: #94a3b8 !important;
+    color: #7a879d !important;
 }
 
 [data-theme="light"] .form-control:focus,
@@ -596,7 +596,7 @@ html[data-theme="light"] body {
 }
 
 [data-theme="light"] .bg-black {
-    background-color: #ffffff !important;
+    background-color: #f8f8f8 !important;
     color: #0f172a !important;
     border-color: #cbd5e1 !important;
 }
@@ -604,19 +604,19 @@ html[data-theme="light"] body {
 [data-theme="light"] .input-group-text.bg-black {
     background-color: #f8fafc !important;
     color: #475569 !important;
-    border-color: #cbd5e1 !important;
+    border-color: #8a929e !important;
 }
 
 /* Tabelas no Modo Claro */
 [data-theme="light"] .table-dark-custom th {
-    background-color: #f8fafc !important;
+    background-color: #eaeef4 !important;
     color: #475569 !important;
     border-bottom: 2px solid #e2e8f0 !important;
 }
 
 [data-theme="light"] .table-dark-custom td {
     color: #1e293b !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid #b0b8c0 !important;
 }
 
 [data-theme="light"] .table-dark-custom tbody tr:hover {
@@ -625,36 +625,36 @@ html[data-theme="light"] body {
 
 /* Aulas de Hoje (Schedule Slots) */
 [data-theme="light"] .schedule-slot {
-    background-color: #f8fafc !important;
+    background-color: #eaeef4 !important;
     border: 1px solid #e2e8f0 !important;
     border-left: 4px solid var(--boxing-red) !important;
 }
 
 [data-theme="light"] .schedule-slot:hover {
     background-color: #f1f5f9 !important;
-    border-color: #cbd5e1 !important;
+    border-color: #8a929e !important;
 }
 
 /* Mensalidades Pendentes */
 [data-theme="light"] .payment-card-item {
-    background-color: #f8fafc !important;
+    background-color: #eaeef4 !important;
     border: 1px solid #e2e8f0 !important;
 }
 
 [data-theme="light"] .payment-card-item:hover {
     background-color: #f1f5f9 !important;
-    border-color: #cbd5e1 !important;
+    border-color: #8a929e !important;
 }
 
 /* Badges e Tags no Modo Claro */
 [data-theme="light"] .badge.bg-dark {
     background-color: #f1f5f9 !important;
     color: #334155 !important;
-    border-color: #cbd5e1 !important;
+    border-color: #8a929e !important;
 }
 
 [data-theme="light"] .badge.bg-secondary:not(.bg-opacity-25) {
-    background-color: #e2e8f0 !important;
+    background-color: #b0b8c0 !important;
     color: #334155 !important;
 }
 

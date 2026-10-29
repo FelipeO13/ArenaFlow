@@ -50,6 +50,7 @@ public class Student
     public string Stance { get => _stance; set => _stance = string.IsNullOrWhiteSpace(value) ? "Destro (Orthodox)" : value; }
     public string MedicalNotes { get => _medicalNotes; set => _medicalNotes = value ?? string.Empty; }
     public bool HasMedicalCertificate { get; set; } = true;
+    public string? PhotoPath { get; set; }
 
     // Plano e Matrícula
     public int? PlanId { get; set; }

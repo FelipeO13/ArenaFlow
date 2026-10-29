@@ -4,20 +4,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BoxeGymManager.Data;
 using BoxeGymManager.Models;
-
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 namespace BoxeGymManager.Pages.Students;
 
 public class CreateModel : PageModel
 {
     private readonly AppDbContext _context;
+    private readonly IWebHostEnvironment _env;
 
-    public CreateModel(AppDbContext context)
+    public CreateModel(AppDbContext context, IWebHostEnvironment env)
     {
         _context = context;
+        _env = env;
     }
 
     [BindProperty]
     public Student Student { get; set; } = new();
+
+    [BindProperty]
+    public IFormFile? PhotoUpload { get; set; }
 
     public SelectList PlansList { get; set; } = null!;
 
@@ -54,6 +61,18 @@ public class CreateModel : PageModel
         if (string.IsNullOrWhiteSpace(Student.Stance))
         {
             Student.Stance = "Destro (Orthodox)";
+        }
+
+        // Handle photo upload
+        if (PhotoUpload != null && PhotoUpload.Length > 0)
+        {
+            var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "students");
+            Directory.CreateDirectory(uploadsFolder);
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(PhotoUpload.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+            using var stream = new FileStream(filePath, FileMode.Create);
+            await PhotoUpload.CopyToAsync(stream);
+            Student.PhotoPath = Path.Combine("images", "students", fileName).Replace("\\", "/");
         }
 
         // Definir categoria de peso automaticamente se não preenchida

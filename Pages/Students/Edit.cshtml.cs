@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BoxeGymManager.Data;
-using BoxeGymManager.Models;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
+using BoxeGymManager.Models;
 namespace BoxeGymManager.Pages.Students;
 
 public class EditModel : PageModel
