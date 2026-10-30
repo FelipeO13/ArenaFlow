@@ -19,6 +19,7 @@ public class IndexModel : PageModel
     public async Task OnGetAsync()
     {
         var classes = await _context.BoxingClasses
+            .Include(c => c.Students)
             .Where(c => c.IsActive)
             .ToListAsync();
         classes = classes.OrderBy(c => c.StartTime).ToList();

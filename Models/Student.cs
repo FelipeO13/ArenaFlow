@@ -101,6 +101,10 @@ public class Student
     public DateTime? PlanEndDate { get; set; }
     public int? DiaVencimento { get; set; }
 
+    // Turma / Aula Alocada
+    public int? BoxingClassId { get; set; }
+    public BoxingClass? BoxingClass { get; set; }
+
     private string _statusReason = string.Empty;
 
     // Situação da Matrícula

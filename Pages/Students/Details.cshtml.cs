@@ -29,6 +29,8 @@ public class DetailsModel : PageModel
 
         var student = await _context.Students
             .Include(s => s.Plan)
+            .Include(s => s.BoxingClass)
+                .ThenInclude(c => c!.Students)
             .Include(s => s.Payments)
             .Include(s => s.AttendanceLogs)
             .FirstOrDefaultAsync(s => s.Id == id);
@@ -104,5 +106,50 @@ public class DetailsModel : PageModel
         };
 
         return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var student = await _context.Students
+            .Include(s => s.Payments)
+            .Include(s => s.AttendanceLogs)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (student == null)
+        {
+            TempData["ErrorMessage"] = "Aluno não localizado para exclusão.";
+            return RedirectToPage("./Index");
+        }
+
+        var studentName = student.FullName;
+        var regCode = student.RegistrationCode;
+
+        try
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            if (student.Payments.Any())
+            {
+                _context.Payments.RemoveRange(student.Payments);
+            }
+
+            if (student.AttendanceLogs.Any())
+            {
+                _context.AttendanceLogs.RemoveRange(student.AttendanceLogs);
+            }
+
+            _context.Students.Remove(student);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            TempData["SuccessMessage"] = $"Aluno {studentName} ({regCode}) foi excluído definitivamente do sistema.";
+            return RedirectToPage("./Index");
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Erro ao tentar excluir o aluno: {ex.Message}";
+            return RedirectToPage(new { id });
+        }
     }
 }

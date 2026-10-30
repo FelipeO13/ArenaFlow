@@ -37,6 +37,12 @@ public class AppDbContext : DbContext
             .WithMany(s => s.AttendanceLogs)
             .HasForeignKey(a => a.StudentId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Student>()
+            .HasOne(s => s.BoxingClass)
+            .WithMany(c => c.Students)
+            .HasForeignKey(s => s.BoxingClassId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 
     public override int SaveChanges()
@@ -100,10 +106,14 @@ public class AppDbContext : DbContext
         {
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
             {
-                entry.Entity.Title ??= string.Empty;
-                entry.Entity.CoachName ??= string.Empty;
+                entry.Entity.CoachName = entry.Entity.CoachName?.Trim() ?? string.Empty;
+                entry.Entity.Title = entry.Entity.DisplayName;
                 entry.Entity.LevelRequirement ??= "Todos os níveis";
                 entry.Entity.RingOrRoom ??= "Ringue Principal";
+                if (!string.IsNullOrWhiteSpace(entry.Entity.Description))
+                    entry.Entity.Description = entry.Entity.Description.Trim();
+                else
+                    entry.Entity.Description = null;
             }
         }
 
@@ -320,6 +330,75 @@ public class AppDbContext : DbContext
             }
         };
         context.AttendanceLogs.AddRange(attendances);
+        context.SaveChanges();
+
+        SeedClasses(context);
+    }
+
+    public static void SeedClasses(AppDbContext context)
+    {
+        var classes = new List<BoxingClass>
+        {
+            // Segunda-feira (inclui Boxe 07:00 às 08:00 e Boxe 18:30 às 19:30)
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Monday, StartTime = new TimeSpan(7, 0, 0), EndTime = new TimeSpan(8, 0, 0), CoachName = "Mestre Popó", MaxCapacity = 16, Description = "Treino matinal focado em condicionamento e fundamentos" },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Monday, StartTime = new TimeSpan(18, 30, 0), EndTime = new TimeSpan(19, 30, 0), CoachName = "Prof. Rogério", MaxCapacity = 14 },
+            new() { Modality = SportModality.JiuJitsu, DayOfWeek = DayOfWeek.Monday, StartTime = new TimeSpan(20, 0, 0), EndTime = new TimeSpan(21, 15, 0), CoachName = "Mestre Gracie", MaxCapacity = 12 },
+
+            // Terça-feira
+            new() { Modality = SportModality.MuayThai, DayOfWeek = DayOfWeek.Tuesday, StartTime = new TimeSpan(7, 30, 0), EndTime = new TimeSpan(8, 45, 0), CoachName = "Kru Buakaw", MaxCapacity = 12 },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Tuesday, StartTime = new TimeSpan(19, 0, 0), EndTime = new TimeSpan(20, 30, 0), CoachName = "Mestre Popó", MaxCapacity = 10 },
+            new() { Modality = SportModality.JiuJitsu, DayOfWeek = DayOfWeek.Tuesday, StartTime = new TimeSpan(20, 30, 0), EndTime = new TimeSpan(21, 45, 0), CoachName = "Prof. Anderson", MaxCapacity = 15 },
+
+            // Quarta-feira
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Wednesday, StartTime = new TimeSpan(8, 0, 0), EndTime = new TimeSpan(9, 0, 0), CoachName = "Prof. Bruna", MaxCapacity = 18 },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Wednesday, StartTime = new TimeSpan(18, 0, 0), EndTime = new TimeSpan(19, 0, 0), CoachName = "Prof. Rogério", MaxCapacity = 14 },
+            new() { Modality = SportModality.MuayThai, DayOfWeek = DayOfWeek.Wednesday, StartTime = new TimeSpan(19, 30, 0), EndTime = new TimeSpan(20, 45, 0), CoachName = "Kru Buakaw", MaxCapacity = 10 },
+
+            // Quinta-feira
+            new() { Modality = SportModality.JiuJitsu, DayOfWeek = DayOfWeek.Thursday, StartTime = new TimeSpan(7, 0, 0), EndTime = new TimeSpan(8, 15, 0), CoachName = "Mestre Gracie", MaxCapacity = 14 },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Thursday, StartTime = new TimeSpan(17, 0, 0), EndTime = new TimeSpan(18, 30, 0), CoachName = "Monitor Plantonista", MaxCapacity = 12 },
+            new() { Modality = SportModality.MuayThai, DayOfWeek = DayOfWeek.Thursday, StartTime = new TimeSpan(19, 0, 0), EndTime = new TimeSpan(20, 15, 0), CoachName = "Kru Buakaw", MaxCapacity = 8 },
+
+            // Sexta-feira
+            new() { Modality = SportModality.JiuJitsu, DayOfWeek = DayOfWeek.Friday, StartTime = new TimeSpan(8, 0, 0), EndTime = new TimeSpan(9, 15, 0), CoachName = "Prof. Anderson", MaxCapacity = 16 },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Friday, StartTime = new TimeSpan(19, 0, 0), EndTime = new TimeSpan(20, 30, 0), CoachName = "Mestre Popó", MaxCapacity = 12 },
+            new() { Modality = SportModality.MuayThai, DayOfWeek = DayOfWeek.Friday, StartTime = new TimeSpan(20, 30, 0), EndTime = new TimeSpan(21, 45, 0), CoachName = "Kru Buakaw", MaxCapacity = 10 },
+
+            // Sábado
+            new() { Modality = SportModality.JiuJitsu, DayOfWeek = DayOfWeek.Saturday, StartTime = new TimeSpan(9, 0, 0), EndTime = new TimeSpan(10, 15, 0), CoachName = "Equipe Gracie", MaxCapacity = 20 },
+            new() { Modality = SportModality.Boxe, DayOfWeek = DayOfWeek.Saturday, StartTime = new TimeSpan(10, 0, 0), EndTime = new TimeSpan(11, 30, 0), CoachName = "Equipe Nobre Arte", MaxCapacity = 25 },
+            new() { Modality = SportModality.MuayThai, DayOfWeek = DayOfWeek.Saturday, StartTime = new TimeSpan(11, 30, 0), EndTime = new TimeSpan(12, 45, 0), CoachName = "Kru Buakaw", MaxCapacity = 12 }
+        };
+
+        foreach (var c in classes)
+        {
+            var existing = context.BoxingClasses.FirstOrDefault(x => x.DayOfWeek == c.DayOfWeek && x.StartTime == c.StartTime);
+            if (existing != null)
+            {
+                existing.Modality = c.Modality;
+                existing.EndTime = c.EndTime;
+                existing.CoachName = c.CoachName;
+                existing.MaxCapacity = c.MaxCapacity;
+                existing.Title = existing.DisplayName;
+                if (!string.IsNullOrWhiteSpace(c.Description) && string.IsNullOrWhiteSpace(existing.Description))
+                {
+                    existing.Description = c.Description;
+                }
+            }
+            else
+            {
+                c.Title = c.DisplayName;
+                context.BoxingClasses.Add(c);
+            }
+        }
+
+        // Garante que todas as aulas salvas no banco tenham Title atualizado para DisplayName
+        var allDbClasses = context.BoxingClasses.ToList();
+        foreach (var cls in allDbClasses)
+        {
+            cls.Title = cls.DisplayName;
+        }
+
         context.SaveChanges();
     }
 }

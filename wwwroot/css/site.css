@@ -363,6 +363,18 @@ h1, h2, h3, h4, .heading-bebas, .brand-title {
     border-color: var(--boxing-border-light);
 }
 
+/* Card interno de Aula (Grade /Schedule e Ficha do Aluno) */
+.schedule-class-item {
+    background-color: var(--boxing-black-card-hover);
+    border: 1px solid var(--boxing-border);
+    border-radius: 8px;
+    transition: all 0.15s ease;
+}
+
+.schedule-class-item:hover {
+    border-color: var(--boxing-border-light);
+}
+
 /* Links interativos */
 a.hover-red {
     transition: color 0.15s ease;

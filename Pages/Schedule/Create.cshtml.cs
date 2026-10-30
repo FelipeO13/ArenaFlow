@@ -22,22 +22,33 @@ public class CreateModel : PageModel
         BoxingClass.StartTime = new TimeSpan(19, 0, 0);
         BoxingClass.EndTime = new TimeSpan(20, 0, 0);
         BoxingClass.MaxCapacity = 15;
-        BoxingClass.RingOrRoom = "Ringue 1";
-        BoxingClass.LevelRequirement = "Todos os níveis";
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
-        if (string.IsNullOrWhiteSpace(BoxingClass.Title) || string.IsNullOrWhiteSpace(BoxingClass.CoachName))
+        if (string.IsNullOrWhiteSpace(BoxingClass.CoachName))
         {
-            ModelState.AddModelError("", "Título e nome do treinador são obrigatórios.");
+            ModelState.AddModelError("BoxingClass.CoachName", "O nome do instrutor é obrigatório.");
             return Page();
         }
 
-        BoxingClass.Title = BoxingClass.Title.Trim();
+        if (BoxingClass.EndTime <= BoxingClass.StartTime)
+        {
+            ModelState.AddModelError("BoxingClass.EndTime", "O horário de término deve ser posterior ao horário de início.");
+            return Page();
+        }
+
+        if (BoxingClass.MaxCapacity <= 0)
+        {
+            ModelState.AddModelError("BoxingClass.MaxCapacity", "O limite de alunos deve ser maior que zero.");
+            return Page();
+        }
+
         BoxingClass.CoachName = BoxingClass.CoachName.Trim();
-        BoxingClass.LevelRequirement = string.IsNullOrWhiteSpace(BoxingClass.LevelRequirement) ? "Todos os níveis" : BoxingClass.LevelRequirement.Trim();
-        BoxingClass.RingOrRoom = string.IsNullOrWhiteSpace(BoxingClass.RingOrRoom) ? "Ringue Principal" : BoxingClass.RingOrRoom.Trim();
+        BoxingClass.Description = string.IsNullOrWhiteSpace(BoxingClass.Description) ? null : BoxingClass.Description.Trim();
+        BoxingClass.Title = BoxingClass.DisplayName;
+        BoxingClass.LevelRequirement = "Todos os níveis";
+        BoxingClass.RingOrRoom = "Academia";
 
         _context.BoxingClasses.Add(BoxingClass);
         await _context.SaveChangesAsync();

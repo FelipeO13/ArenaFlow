@@ -250,14 +250,13 @@
                     {
                         <div class="schedule-slot d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="fw-bold text-white">@c.Title</div>
+                                <div class="fw-bold text-white">@BoxeGymManager.Services.ScheduleHelper.FormatClassSummary(c)</div>
                                 <div class="small text-secondary">
-                                    <i class="bi bi-person-badge"></i> @c.CoachName &bull; <i class="bi bi-geo-alt"></i> @c.RingOrRoom
+                                    <i class="bi bi-person-badge"></i> @c.CoachName
                                 </div>
                             </div>
                             <div class="text-end">
-                                <span class="badge bg-dark border border-secondary text-subtle-light fs-6">@c.StartTime.ToString(@"hh\:mm") - @c.EndTime.ToString(@"hh\:mm")</span>
-                                <div class="small text-secondary mt-1"><span class="text-meta-label">Capacidade:</span> @c.MaxCapacity</div>
+                                <span class="badge bg-dark border border-secondary text-subtle-light fs-6">@c.DisplayName</span>
                             </div>
                         </div>
                     }

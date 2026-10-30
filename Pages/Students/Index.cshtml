@@ -4,6 +4,21 @@
     ViewData["Title"] = "Gestão de Alunos";
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4 border-success shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 border-danger shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
         <h1 class="display-6 text-white mb-0">GESTÃO DE ATLETAS & ALUNOS</h1>
@@ -86,6 +101,12 @@
                                         </div>
                                         <div class="small text-secondary">
                                             <span class="badge bg-secondary">@s.RegistrationCode</span> &bull; Tel: @s.Phone
+                                            @if (s.BoxingClass != null)
+                                            {
+                                                <span class="badge bg-dark border border-danger text-light ms-1" title="@s.BoxingClass.DisplayName">
+                                                    <i class="bi bi-clock-history text-danger"></i> @BoxeGymManager.Services.ScheduleHelper.FormatDayOfWeek(s.BoxingClass.DayOfWeek) @s.BoxingClass.StartTime.ToString(@"hh\:mm")
+                                                </span>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -148,6 +169,9 @@
                                     <a asp-page="/Payments/Create" asp-route-studentId="@s.Id" class="btn btn-outline-success" title="Registrar Pagamento">
                                         <i class="bi bi-cash"></i>
                                     </a>
+                                    <button type="button" class="btn btn-outline-danger" title="Excluir Aluno" data-bs-toggle="modal" data-bs-target="#deleteStudentModal" data-student-id="@s.Id" data-student-name="@s.FullName" data-student-code="@s.RegistrationCode">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -164,3 +188,53 @@
         </div>
     }
 </div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-danger shadow-lg">
+            <form method="post" asp-page-handler="Delete">
+                <input type="hidden" name="id" id="deleteStudentId" />
+                <div class="modal-header border-secondary border-opacity-50">
+                    <h5 class="modal-title text-danger" id="deleteStudentModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Excluir Aluno Definitivamente
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-6 mb-2">
+                        Deseja realmente excluir o aluno <strong class="text-white" id="deleteStudentName"></strong> (<span class="text-secondary" id="deleteStudentCode"></span>)?
+                    </p>
+                    <div class="alert alert-danger bg-danger bg-opacity-10 border-danger text-light small mb-0">
+                        <i class="bi bi-shield-fill-x text-danger me-1"></i>
+                        Esta ação é permanente e apaga também os pagamentos e os registros de entrada e saída deste aluno. Para apenas desativar o aluno, use a opção Inativar.
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary border-opacity-50">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="bi bi-trash me-1"></i> Excluir definitivamente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteStudentModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const studentId = button.getAttribute('data-student-id');
+                const studentName = button.getAttribute('data-student-name');
+                const studentCode = button.getAttribute('data-student-code');
+
+                document.getElementById('deleteStudentId').value = studentId;
+                document.getElementById('deleteStudentName').textContent = studentName;
+                document.getElementById('deleteStudentCode').textContent = studentCode;
+            });
+        }
+    </script>
+}

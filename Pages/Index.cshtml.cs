@@ -205,6 +205,7 @@ public class IndexModel : PageModel
 
         var currentDayOfWeek = DateTime.Today.DayOfWeek;
         var rawClasses = await _context.BoxingClasses
+            .Include(c => c.Students)
             .Where(c => c.IsActive && c.DayOfWeek == currentDayOfWeek)
             .ToListAsync();
         TodayClasses = rawClasses.OrderBy(c => c.StartTime).ToList();

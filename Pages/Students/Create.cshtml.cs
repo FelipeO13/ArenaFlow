@@ -29,6 +29,7 @@ public class CreateModel : PageModel
     public IFormFile? PhotoUpload { get; set; }
 
     public SelectList PlansList { get; set; } = null!;
+    public List<SelectListItem> AvailableClasses { get; set; } = new();
 
     public int[] DiasVencimentoPermitidos => CalculadoraVencimento.DiasVencimentoPermitidos;
 
@@ -42,7 +43,24 @@ public class CreateModel : PageModel
         Student.DiaVencimento = 10; // Padrão selecionado
 
         await LoadPlansAsync();
+        await LoadClassesAsync(Student.Modality);
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetClassesByModalityAsync(SportModality modality)
+    {
+        var rawClasses = await _context.BoxingClasses
+            .Include(c => c.Students)
+            .Where(c => c.IsActive && c.Modality == modality)
+            .ToListAsync();
+
+        var ordered = rawClasses
+            .OrderBy(c => ScheduleHelper.GetDayOrder(c.DayOfWeek))
+            .ThenBy(c => c.StartTime)
+            .Select(c => ScheduleHelper.ToOptionDto(c))
+            .ToList();
+
+        return new JsonResult(ordered);
     }
 
     public async Task<IActionResult> OnGetCalcularProporcionalAsync(int planId, int diaVencimento, string? dataMatricula)
@@ -71,8 +89,31 @@ public class CreateModel : PageModel
         if (string.IsNullOrWhiteSpace(Student.FullName) || string.IsNullOrWhiteSpace(Student.RegistrationCode))
         {
             ModelState.AddModelError("", "Nome completo e matrícula são obrigatórios.");
-            await LoadPlansAsync();
-            return Page();
+        }
+
+        // Validação obrigatória da aula alocada na grade
+        if (!Student.BoxingClassId.HasValue || Student.BoxingClassId.Value <= 0)
+        {
+            ModelState.AddModelError("Student.BoxingClassId", "A alocação de uma aula na grade é obrigatória.");
+        }
+        else
+        {
+            var selectedClass = await _context.BoxingClasses
+                .Include(c => c.Students)
+                .FirstOrDefaultAsync(c => c.Id == Student.BoxingClassId.Value && c.IsActive);
+
+            if (selectedClass == null)
+            {
+                ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada não foi encontrada ou não está ativa.");
+            }
+            else if (selectedClass.Modality != Student.Modality)
+            {
+                ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada não pertence à modalidade escolhida.");
+            }
+            else if (selectedClass.Students.Count >= selectedClass.MaxCapacity)
+            {
+                ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada está lotada. Escolha outro horário com vagas disponíveis.");
+            }
         }
 
         // Validação de Dia de Vencimento
@@ -118,6 +159,7 @@ public class CreateModel : PageModel
         if (!ModelState.IsValid)
         {
             await LoadPlansAsync();
+            await LoadClassesAsync(Student.Modality);
             return Page();
         }
 
@@ -233,6 +275,28 @@ public class CreateModel : PageModel
     {
         var plans = await _context.Plans.Where(p => p.IsActive).ToListAsync();
         PlansList = new SelectList(plans, "Id", "Name");
+    }
+
+    private async Task LoadClassesAsync(SportModality modality)
+    {
+        var rawClasses = await _context.BoxingClasses
+            .Include(c => c.Students)
+            .Where(c => c.IsActive && c.Modality == modality)
+            .ToListAsync();
+
+        var ordered = rawClasses
+            .OrderBy(c => ScheduleHelper.GetDayOrder(c.DayOfWeek))
+            .ThenBy(c => c.StartTime)
+            .Select(c => ScheduleHelper.ToOptionDto(c))
+            .ToList();
+
+        AvailableClasses = ordered.Select(dto => new SelectListItem
+        {
+            Value = dto.Id.ToString(),
+            Text = dto.DisplayText,
+            Disabled = dto.IsFull,
+            Selected = Student.BoxingClassId == dto.Id
+        }).ToList();
     }
 
     private string CalculateWeightCategory(decimal weight)

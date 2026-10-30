@@ -33,6 +33,7 @@ public class IndexModel : PageModel
     {
         var query = _context.Students
             .Include(s => s.Plan)
+            .Include(s => s.BoxingClass)
             .Include(s => s.Payments)
             .AsQueryable();
 
@@ -59,5 +60,50 @@ public class IndexModel : PageModel
         }
 
         Students = await query.OrderByDescending(s => s.CreatedAt).ToListAsync();
+    }
+
+    public async Task<IActionResult> OnPostDeleteAsync(int id)
+    {
+        var student = await _context.Students
+            .Include(s => s.Payments)
+            .Include(s => s.AttendanceLogs)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (student == null)
+        {
+            TempData["ErrorMessage"] = "Aluno não localizado para exclusão.";
+            return RedirectToPage();
+        }
+
+        var studentName = student.FullName;
+        var regCode = student.RegistrationCode;
+
+        try
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            if (student.Payments.Any())
+            {
+                _context.Payments.RemoveRange(student.Payments);
+            }
+
+            if (student.AttendanceLogs.Any())
+            {
+                _context.AttendanceLogs.RemoveRange(student.AttendanceLogs);
+            }
+
+            _context.Students.Remove(student);
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            TempData["SuccessMessage"] = $"Aluno {studentName} ({regCode}) foi excluído definitivamente do sistema.";
+        }
+        catch (Exception ex)
+        {
+            TempData["ErrorMessage"] = $"Erro ao tentar excluir o aluno: {ex.Message}";
+        }
+
+        return RedirectToPage();
     }
 }

@@ -11,6 +11,13 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show mb-4 border-danger shadow-sm" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <!-- CABEÇALHO DA FICHA DO ALUNO -->
 <div class="boxing-card p-4 mb-4 border-secondary">
@@ -65,6 +72,21 @@
                     <span>
                         <i class="bi bi-calendar2-check me-1 text-info"></i>
                         Vencimento Fixo: <strong class="text-white">@(Model.Student.DiaVencimento.HasValue ? $"Dia {Model.Student.DiaVencimento.Value}" : "Não definido")</strong>
+                    </span>
+                    <span>&bull;</span>
+                    <span>
+                        <i class="bi bi-clock-history me-1 text-danger"></i>
+                        Turma: 
+                        @if (Model.Student.BoxingClass != null)
+                        {
+                            <strong class="text-white">
+                                @BoxeGymManager.Services.ScheduleHelper.FormatClassSummary(Model.Student.BoxingClass)
+                            </strong>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sem turma alocada</span>
+                        }
                     </span>
                 </div>
             </div>
@@ -223,6 +245,34 @@
             </div>
 
             <div class="row g-3">
+                <!-- Turma Alocada na Grade -->
+                <div class="col-12 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block mb-1">Turma Alocada na Grade Semanal:</span>
+                    @if (Model.Student.BoxingClass != null)
+                    {
+                        var c = Model.Student.BoxingClass;
+                        <div class="schedule-class-item p-2 border-danger border-opacity-50">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                                <span class="fw-bold text-white fs-6">@BoxeGymManager.Services.ScheduleHelper.FormatClassSummary(c)</span>
+                                <span class="badge bg-danger">
+                                    @BoxeGymManager.Services.ScheduleHelper.FormatDayOfWeekFull(c.DayOfWeek)
+                                </span>
+                            </div>
+                            <div class="small text-secondary">
+                                <i class="bi bi-person-badge text-danger"></i> Instrutor: <span class="text-light">@c.CoachName</span>
+                                @if (!string.IsNullOrWhiteSpace(c.Description))
+                                {
+                                    <span class="ms-2 text-muted">&bull; @c.Description</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-muted fw-semibold">Aluno sem turma fixa alocada na grade (Horário livre / Aluno antigo).</span>
+                    }
+                </div>
+
                 <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary small d-block">Modalidade:</span>
                     <span class="badge bg-warning text-dark fw-bold">@Model.Student.Modality</span>
@@ -502,6 +552,22 @@
             }
         </div>
     </div>
+    <!-- Zona de Exclusão (Separado no fim da página) -->
+    <div class="boxing-card p-3 p-md-4 mt-4 border-danger border-opacity-50 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h4 class="h6 text-danger mb-1 fw-bold">
+                <i class="bi bi-trash3-fill me-1"></i> Exclusão Definitiva de Aluno
+            </h4>
+            <p class="text-secondary small mb-0">
+                Esta ação remove o aluno de forma permanente e limpa seus registros para liberar a vaga.
+            </p>
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger fw-bold px-4 py-2" data-bs-toggle="modal" data-bs-target="#modalExcluirAluno">
+                <i class="bi bi-trash me-1"></i> Excluir aluno
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- Modais de Suspensão / Cancelamento -->
@@ -551,6 +617,38 @@
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
                     <button type="submit" class="btn btn-danger fw-bold">Confirmar Inativação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Exclusão Definitiva na Ficha -->
+<div class="modal fade" id="modalExcluirAluno" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-danger shadow-lg">
+            <form method="post" asp-page-handler="Delete">
+                <input type="hidden" name="id" value="@Model.Student.Id" />
+                <div class="modal-header border-secondary border-opacity-50">
+                    <h5 class="modal-title text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Excluir Aluno Definitivamente
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="fs-6 mb-2">
+                        Deseja realmente excluir o aluno <strong class="text-white">@Model.Student.FullName</strong> (<span class="text-secondary">@Model.Student.RegistrationCode</span>)?
+                    </p>
+                    <div class="alert alert-danger bg-danger bg-opacity-10 border-danger text-light small mb-0">
+                        <i class="bi bi-shield-fill-x text-danger me-1"></i>
+                        Esta ação é permanente e apaga também os pagamentos e os registros de entrada e saída deste aluno. Para apenas desativar o aluno, use a opção Inativar.
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary border-opacity-50">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">
+                        <i class="bi bi-trash me-1"></i> Excluir definitivamente
+                    </button>
                 </div>
             </form>
         </div>

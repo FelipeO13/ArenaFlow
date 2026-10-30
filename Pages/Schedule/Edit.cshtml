@@ -1,0 +1,78 @@
+@page "{id:int}"
+@model BoxeGymManager.Pages.Schedule.EditModel
+@{
+    ViewData["Title"] = "Editar Horário";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 text-white mb-0">EDITAR HORÁRIO / TURMA</h1>
+        <p class="text-secondary mb-0">Atualize as informações da aula na grade semanal.</p>
+    </div>
+    <a asp-page="./Index" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="boxing-card p-4">
+            <form method="post">
+                <input type="hidden" asp-for="BoxingClass.Id" />
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.Modality" class="form-label text-light small fw-bold">Modalidade</label>
+                        <select asp-for="BoxingClass.Modality" class="form-select bg-dark text-white border-secondary" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.SportModality>()">
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.DayOfWeek" class="form-label text-light small fw-bold">Dia da Semana</label>
+                        <select asp-for="BoxingClass.DayOfWeek" class="form-select bg-dark text-white border-secondary">
+                            <option value="Monday">Segunda-feira</option>
+                            <option value="Tuesday">Terça-feira</option>
+                            <option value="Wednesday">Quarta-feira</option>
+                            <option value="Thursday">Quinta-feira</option>
+                            <option value="Friday">Sexta-feira</option>
+                            <option value="Saturday">Sábado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.StartTime" class="form-label text-light small fw-bold">Horário de Início</label>
+                        <input asp-for="BoxingClass.StartTime" type="time" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.EndTime" class="form-label text-light small fw-bold">Horário de Término</label>
+                        <input asp-for="BoxingClass.EndTime" type="time" class="form-control" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.CoachName" class="form-label text-light small fw-bold">Instrutor</label>
+                        <input asp-for="BoxingClass.CoachName" class="form-control" placeholder="Ex: Mestre Popó" required />
+                        <span asp-validation-for="BoxingClass.CoachName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="BoxingClass.MaxCapacity" class="form-label text-light small fw-bold">Limite de Alunos</label>
+                        <input asp-for="BoxingClass.MaxCapacity" type="number" min="1" max="100" class="form-control" required />
+                        <span asp-validation-for="BoxingClass.MaxCapacity" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="BoxingClass.Description" class="form-label text-light small fw-bold">Descrição <span class="text-secondary fw-normal">(opcional)</span></label>
+                        <input asp-for="BoxingClass.Description" class="form-control" placeholder="Anotação curta sobre a aula (opcional)" maxlength="120" />
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-danger btn-lg fw-bold py-3">
+                        <i class="bi bi-check-circle me-2"></i> Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

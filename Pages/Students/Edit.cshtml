@@ -24,27 +24,46 @@
     <input type="hidden" asp-for="Student.RegistrationCode" />
 
     <div class="row g-4">
-        <!-- 1) MODALIDADE (primeiro campo do formulário, obrigatório) -->
+        <!-- 1) MODALIDADE & TURMA ALOCADA -->
         <div class="col-12">
             <div class="boxing-card p-4 border border-danger border-opacity-50">
                 <div class="d-flex align-items-center justify-content-between mb-3">
                     <h3 class="h5 text-white mb-0">
-                        <i class="bi bi-trophy-fill text-danger me-2"></i> 1. Modalidade Esportiva
+                        <i class="bi bi-trophy-fill text-danger me-2"></i> 1. Modalidade Esportiva & Turma Alocada
                     </h3>
                     <span class="badge bg-danger">Obrigatório</span>
                 </div>
-                <div class="row g-3 align-items-center">
+                <div class="row g-3">
                     <div class="col-md-6">
                         <label asp-for="Student.Modality" class="form-label text-light small fw-bold">Modalidade</label>
-                        <select asp-for="Student.Modality" class="form-select form-select-lg fw-bold bg-dark text-white border-danger" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.SportModality>()" required>
+                        <select asp-for="Student.Modality" id="modalitySelect" class="form-select form-select-lg fw-bold bg-dark text-white border-danger" asp-items="Html.GetEnumSelectList<BoxeGymManager.Models.SportModality>()" required>
                         </select>
-                        <div class="form-text text-secondary">Boxe, Jiu-Jitsu ou Muay Thai (expansível para novas modalidades).</div>
+                        <div class="form-text text-secondary">Boxe, Jiu-Jitsu ou Muay Thai (ao mudar, a grade recarrega automaticamente).</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label text-light small fw-bold">Matrícula Atual</label>
                         <div class="form-control form-control-lg bg-black text-danger fw-bold border-secondary">
                             @Model.Student.RegistrationCode
                         </div>
+                    </div>
+
+                    <!-- Seletor de Aula / Turma (Logo após a modalidade) -->
+                    <div class="col-12 mt-3 pt-3 border-top border-secondary border-opacity-25">
+                        <label asp-for="Student.BoxingClassId" class="form-label text-light small fw-bold d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-clock-history text-danger me-1"></i> Aula / Horário Alocado na Grade
+                            </span>
+                            <span class="badge bg-secondary" id="classesCountBadge">@Model.AvailableClasses.Count horários</span>
+                        </label>
+                        <select asp-for="Student.BoxingClassId" id="classSelect" class="form-select form-select-lg bg-black text-white border-secondary">
+                            <option value="">-- Sem turma alocada (Horário livre / Regra anterior) --</option>
+                            @foreach (var item in Model.AvailableClasses)
+                            {
+                                <option value="@item.Value" disabled="@item.Disabled" selected="@item.Selected">@item.Text</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Student.BoxingClassId" class="text-danger small"></span>
+                        <div class="form-text text-secondary">Trocar de aula libera a vaga da turma anterior. Aulas lotadas aparecem desabilitadas ("Lotada").</div>
                     </div>
                 </div>
             </div>
@@ -369,6 +388,51 @@
             }
         }
 
+        async function carregarAulasPorModalidade(selectedId) {
+            const modalitySelect = document.getElementById('modalitySelect');
+            const classSelect = document.getElementById('classSelect');
+            const badge = document.getElementById('classesCountBadge');
+            if (!modalitySelect || !classSelect) return;
+
+            const mod = modalitySelect.value;
+            const currentStudentId = @Model.Student.Id;
+            classSelect.innerHTML = '<option value="">Carregando turmas disponíveis...</option>';
+            classSelect.disabled = true;
+
+            try {
+                const resp = await fetch(`?handler=ClassesByModality&modality=${encodeURIComponent(mod)}&currentStudentId=${encodeURIComponent(currentStudentId)}`);
+                if (!resp.ok) throw new Error('Falha ao obter turmas');
+                const data = await resp.json();
+
+                classSelect.innerHTML = '<option value="">-- Sem turma alocada (Horário livre / Regra anterior) --</option>';
+                let vagasLivres = 0;
+                data.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.textContent = item.displayText;
+                    if (item.isFull && (!selectedId || item.id != selectedId)) {
+                        opt.disabled = true;
+                    } else {
+                        vagasLivres++;
+                    }
+                    if (selectedId && item.id == selectedId) {
+                        opt.selected = true;
+                    }
+                    classSelect.appendChild(opt);
+                });
+
+                if (badge) {
+                    badge.textContent = `${data.length} horários (${vagasLivres} com vagas)`;
+                }
+            } catch (err) {
+                console.error('Erro ao carregar turmas:', err);
+                classSelect.innerHTML = '<option value="">Erro ao carregar horários</option>';
+            } finally {
+                classSelect.disabled = false;
+            }
+        }
+
+        document.getElementById('modalitySelect')?.addEventListener('change', () => carregarAulasPorModalidade());
         document.getElementById('birthDateInput')?.addEventListener('change', updateGuardianVisibility);
         document.getElementById('birthDateInput')?.addEventListener('input', updateGuardianVisibility);
         document.addEventListener('DOMContentLoaded', updateGuardianVisibility);

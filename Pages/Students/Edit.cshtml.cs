@@ -25,6 +25,7 @@ public class EditModel : PageModel
     public Student Student { get; set; } = null!;
 
     public SelectList PlansList { get; set; } = null!;
+    public List<SelectListItem> AvailableClasses { get; set; } = new();
 
     public int[] DiasVencimentoPermitidos => CalculadoraVencimento.DiasVencimentoPermitidos;
 
@@ -37,7 +38,24 @@ public class EditModel : PageModel
 
         Student = student;
         await LoadPlansAsync();
+        await LoadClassesAsync(Student.Modality, Student.BoxingClassId, Student.Id);
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetClassesByModalityAsync(SportModality modality, int? currentStudentId)
+    {
+        var rawClasses = await _context.BoxingClasses
+            .Include(c => c.Students)
+            .Where(c => c.IsActive && c.Modality == modality)
+            .ToListAsync();
+
+        var ordered = rawClasses
+            .OrderBy(c => ScheduleHelper.GetDayOrder(c.DayOfWeek))
+            .ThenBy(c => c.StartTime)
+            .Select(c => ScheduleHelper.ToOptionDto(c, currentStudentId))
+            .ToList();
+
+        return new JsonResult(ordered);
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -45,8 +63,40 @@ public class EditModel : PageModel
         if (string.IsNullOrWhiteSpace(Student.FullName))
         {
             ModelState.AddModelError("", "Nome é obrigatório.");
-            await LoadPlansAsync();
-            return Page();
+        }
+
+        // Validação da aula alocada
+        if (Student.BoxingClassId.HasValue && Student.BoxingClassId.Value > 0)
+        {
+            var selectedClass = await _context.BoxingClasses
+                .Include(c => c.Students)
+                .FirstOrDefaultAsync(c => c.Id == Student.BoxingClassId.Value && c.IsActive);
+
+            if (selectedClass == null)
+            {
+                ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada não foi encontrada ou não está ativa.");
+            }
+            else if (selectedClass.Modality != Student.Modality)
+            {
+                ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada não pertence à modalidade escolhida.");
+            }
+            else
+            {
+                // Verifica se mudou de aula e se a nova está cheia
+                var dbCurrentClassId = await _context.Students
+                    .Where(s => s.Id == Student.Id)
+                    .Select(s => s.BoxingClassId)
+                    .FirstOrDefaultAsync();
+
+                if (dbCurrentClassId != Student.BoxingClassId.Value)
+                {
+                    var occupiedOthers = selectedClass.Students.Count(s => s.Id != Student.Id);
+                    if (occupiedOthers >= selectedClass.MaxCapacity)
+                    {
+                        ModelState.AddModelError("Student.BoxingClassId", "A aula selecionada está lotada. Escolha outro horário com vagas disponíveis.");
+                    }
+                }
+            }
         }
 
         // Validação de CNH (opcional, mas deve ter 11 dígitos se preenchida)
@@ -83,6 +133,7 @@ public class EditModel : PageModel
         if (!ModelState.IsValid)
         {
             await LoadPlansAsync();
+            await LoadClassesAsync(Student.Modality, Student.BoxingClassId, Student.Id);
             return Page();
         }
 
@@ -90,6 +141,9 @@ public class EditModel : PageModel
         if (dbStudent == null) return NotFound();
 
         dbStudent.Modality = Student.Modality;
+        dbStudent.BoxingClassId = (Student.BoxingClassId.HasValue && Student.BoxingClassId.Value > 0)
+            ? Student.BoxingClassId.Value
+            : null;
         dbStudent.FullName = Student.FullName.Trim();
         dbStudent.CPF = Student.CPF?.Trim() ?? string.Empty;
         dbStudent.BirthDate = Student.BirthDate;
@@ -134,5 +188,27 @@ public class EditModel : PageModel
     {
         var plans = await _context.Plans.Where(p => p.IsActive).ToListAsync();
         PlansList = new SelectList(plans, "Id", "Name");
+    }
+
+    private async Task LoadClassesAsync(SportModality modality, int? currentClassId, int? currentStudentId)
+    {
+        var rawClasses = await _context.BoxingClasses
+            .Include(c => c.Students)
+            .Where(c => c.IsActive && c.Modality == modality)
+            .ToListAsync();
+
+        var ordered = rawClasses
+            .OrderBy(c => ScheduleHelper.GetDayOrder(c.DayOfWeek))
+            .ThenBy(c => c.StartTime)
+            .Select(c => ScheduleHelper.ToOptionDto(c, currentStudentId))
+            .ToList();
+
+        AvailableClasses = ordered.Select(dto => new SelectListItem
+        {
+            Value = dto.Id.ToString(),
+            Text = dto.DisplayText,
+            Disabled = dto.IsFull,
+            Selected = currentClassId == dto.Id
+        }).ToList();
     }
 }
