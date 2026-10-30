@@ -295,6 +295,10 @@
                                 <div class="text-secondary small">
                                     <span class="text-meta-label">Vencimento:</span> <strong class="text-white">@p.DueDate.ToString("dd/MM/yyyy")</strong>
                                     &bull; <span class="text-subtle-light">@p.Student?.RegistrationCode</span>
+                                    @if (p.Student?.DiaVencimento.HasValue == true)
+                                    {
+                                        <span class="badge bg-dark border border-secondary text-info ms-1">Dia @p.Student.DiaVencimento</span>
+                                    }
                                 </div>
                             </div>
                             <div class="text-end">

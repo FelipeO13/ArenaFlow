@@ -17,7 +17,11 @@ public class DetailsModel : PageModel
 
     public Student Student { get; set; } = null!;
     public List<Payment> Payments { get; set; } = new();
-    public List<AttendanceLog> Attendances { get; set; } = new();
+    public Payment? LastPayment { get; set; }
+    public string PaymentStatusText { get; set; } = "Em dia";
+    public string PaymentStatusBadgeClass { get; set; } = "bg-success";
+    public int MonthlyCheckInsCount { get; set; }
+    public List<AttendanceLog> RecentAttendances { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -33,7 +37,48 @@ public class DetailsModel : PageModel
 
         Student = student;
         Payments = student.Payments.OrderByDescending(p => p.DueDate).ToList();
-        Attendances = student.AttendanceLogs.OrderByDescending(a => a.EntryTime).Take(20).ToList();
+        
+        LastPayment = student.Payments
+            .Where(p => p.Status == PaymentStatus.Pago)
+            .OrderByDescending(p => p.PaidDate ?? p.DueDate)
+            .FirstOrDefault();
+
+        var today = DateTime.Today;
+        var hasOverdue = student.Payments.Any(p => p.Status == PaymentStatus.Atrasado || (p.Status == PaymentStatus.Pendente && p.DueDate < today))
+                         || (student.PlanEndDate.HasValue && student.PlanEndDate.Value < today);
+
+        var hasPendingNearDue = student.Payments.Any(p => p.Status == PaymentStatus.Pendente && p.DueDate >= today)
+                                || (student.PlanEndDate.HasValue && student.PlanEndDate.Value >= today && student.PlanEndDate.Value <= today.AddDays(7));
+
+        if (hasOverdue)
+        {
+            PaymentStatusText = "Atrasado";
+            PaymentStatusBadgeClass = "bg-danger";
+        }
+        else if (hasPendingNearDue)
+        {
+            PaymentStatusText = "A Vencer";
+            PaymentStatusBadgeClass = "bg-warning text-dark";
+        }
+        else if (student.Payments.Any(p => p.Status == PaymentStatus.Pago) || (student.PlanEndDate.HasValue && student.PlanEndDate.Value >= today))
+        {
+            PaymentStatusText = "Em dia";
+            PaymentStatusBadgeClass = "bg-success";
+        }
+        else
+        {
+            PaymentStatusText = "Sem pagamentos";
+            PaymentStatusBadgeClass = "bg-secondary";
+        }
+
+        MonthlyCheckInsCount = student.AttendanceLogs
+            .Count(a => a.EntryTime.Year == today.Year && a.EntryTime.Month == today.Month
+                     && a.AccessStatus != AccessStatus.BloqueadoInativo && a.AccessStatus != AccessStatus.BloqueadoInadimplente);
+
+        RecentAttendances = student.AttendanceLogs
+            .OrderByDescending(a => a.EntryTime)
+            .Take(10)
+            .ToList();
 
         return Page();
     }

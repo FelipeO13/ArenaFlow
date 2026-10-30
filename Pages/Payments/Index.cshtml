@@ -93,7 +93,13 @@
                             <td><span class="badge bg-secondary">@p.ReceiptCode</span></td>
                             <td>
                                 <div class="fw-bold text-white">@p.Student?.FullName</div>
-                                <div class="small text-secondary">Matrícula: @p.Student?.RegistrationCode</div>
+                                <div class="small text-secondary">
+                                    Matrícula: @p.Student?.RegistrationCode
+                                    @if (p.Student?.DiaVencimento.HasValue == true)
+                                    {
+                                        <span class="badge bg-dark border border-secondary text-info ms-1">Dia @p.Student.DiaVencimento</span>
+                                    }
+                                </div>
                             </td>
                             <td>@p.ReferenceMonthYear</td>
                             <td class="text-success fw-bold fs-6">@p.Amount.ToString("C")</td>

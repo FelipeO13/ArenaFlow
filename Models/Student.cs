@@ -99,6 +99,7 @@ public class Student
     public Plan? Plan { get; set; }
     public DateTime? PlanStartDate { get; set; }
     public DateTime? PlanEndDate { get; set; }
+    public int? DiaVencimento { get; set; }
 
     private string _statusReason = string.Empty;
 

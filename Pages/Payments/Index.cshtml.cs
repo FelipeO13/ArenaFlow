@@ -66,23 +66,13 @@ public class IndexModel : PageModel
             payment.PaidDate = DateTime.Now;
             payment.Method = method;
 
-            // Se o plano do aluno estava vencido, renovar de acordo com o plano
+            // Se o plano do aluno estava associado, renovar de acordo com o plano e o dia de vencimento
             if (payment.Student?.PlanId != null)
             {
                 var plan = await _context.Plans.FindAsync(payment.Student.PlanId);
                 if (plan != null)
                 {
-                    var baseDate = payment.Student.PlanEndDate.HasValue && payment.Student.PlanEndDate.Value > DateTime.Today 
-                        ? payment.Student.PlanEndDate.Value 
-                        : DateTime.Today;
-
-                    payment.Student.PlanEndDate = plan.BillingCycle switch
-                    {
-                        PlanBillingCycle.Trimestral => baseDate.AddMonths(3),
-                        PlanBillingCycle.Semestral => baseDate.AddMonths(6),
-                        PlanBillingCycle.Anual => baseDate.AddYears(1),
-                        _ => baseDate.AddMonths(1)
-                    };
+                    payment.Student.PlanEndDate = BoxeGymManager.Services.CalculadoraVencimento.CalcularProximaValidade(payment.Student, plan);
                 }
             }
 

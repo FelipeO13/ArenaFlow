@@ -72,7 +72,7 @@
                         var hasOverdue = s.Payments.Any(p => p.Status == BoxeGymManager.Models.PaymentStatus.Atrasado || (p.Status == BoxeGymManager.Models.PaymentStatus.Pendente && p.DueDate < DateTime.Today));
                         var planExpired = s.PlanEndDate.HasValue && s.PlanEndDate.Value < DateTime.Today;
 
-                        <tr>
+                        <tr style="cursor: pointer;" onclick="if (!event.target.closest('a, button, input, form')) { window.location.href = '@Url.Page("/Students/Details", new { id = s.Id })'; }">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle bg-danger bg-opacity-25 text-danger d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; min-width: 40px;">
@@ -100,7 +100,13 @@
                                 <div class="fw-semibold text-light">@(s.Plan?.Name ?? "Sem plano associado")</div>
                                 @if (s.PlanEndDate.HasValue)
                                 {
-                                    <div class="small text-muted">Vence em: @s.PlanEndDate.Value.ToString("dd/MM/yyyy")</div>
+                                    <div class="small text-muted">
+                                        Vence em: @s.PlanEndDate.Value.ToString("dd/MM/yyyy")
+                                        @if (s.DiaVencimento.HasValue)
+                                        {
+                                            <span class="badge bg-dark border border-secondary text-info ms-1">Dia @s.DiaVencimento</span>
+                                        }
+                                    </div>
                                 }
                             </td>
                             <td>

@@ -219,18 +219,70 @@
                 <div class="row g-3">
                     <div class="col-12">
                         <label asp-for="Student.PlanId" class="form-label text-light small fw-bold">Plano de Treino Escolhido</label>
-                        <select asp-for="Student.PlanId" class="form-select form-select-lg" asp-items="Model.PlansList">
+                        <select asp-for="Student.PlanId" id="planSelect" class="form-select form-select-lg" asp-items="Model.PlansList">
                             <option value="">-- Sem plano por enquanto --</option>
                         </select>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="Student.PlanStartDate" class="form-label text-light small fw-bold">Data de Início</label>
-                        <input asp-for="Student.PlanStartDate" type="date" class="form-control" />
+                        <label asp-for="Student.PlanStartDate" class="form-label text-light small fw-bold">Data de Início da Matrícula</label>
+                        <input asp-for="Student.PlanStartDate" id="planStartDate" type="date" class="form-control" />
                     </div>
 
-                    <div class="col-md-6 d-flex align-items-center">
-                        <div class="form-check form-switch mt-4">
+                    <!-- 1) Dia de Vencimento Fixo (Obrigatório: dia 10 ou 25) -->
+                    <div class="col-md-6" id="groupDiaVencimento">
+                        <label class="form-label text-light small fw-bold">
+                            <i class="bi bi-calendar-event text-warning me-1"></i> Dia de Vencimento <span class="text-danger">*</span>
+                        </label>
+                        <div class="d-flex gap-2">
+                            @foreach (var dia in Model.DiasVencimentoPermitidos)
+                            {
+                                <div class="form-check form-check-inline bg-black p-2 px-3 rounded border border-secondary flex-fill text-center">
+                                    <input class="form-check-input due-day-radio" type="radio" asp-for="Student.DiaVencimento" id="venc_@dia" value="@dia" />
+                                    <label class="form-check-label text-white fw-bold cursor-pointer" for="venc_@dia">
+                                        Todo dia @dia
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                        <span asp-validation-for="Student.DiaVencimento" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Resumo Proporcional do 1º Pagamento -->
+                    <div class="col-12" id="boxResumoProporcional" style="display: none;">
+                        <div class="p-3 bg-dark rounded border border-warning border-opacity-75 shadow-sm">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="text-warning fw-bold small">
+                                    <i class="bi bi-calculator me-1"></i> Resumo do 1º Pagamento Proporcional
+                                </span>
+                                <span class="badge bg-warning text-dark fw-bold" id="badgeAjuste">Ajuste</span>
+                            </div>
+                            <div class="row g-2 small">
+                                <div class="col-6 col-md-3">
+                                    <span class="text-secondary d-block">Mensalidade:</span>
+                                    <span class="text-white fw-bold" id="resumoValorPlano">R$ 0,00</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-secondary d-block">Ajuste Proporcional:</span>
+                                    <span class="fw-bold" id="resumoAjuste">0 dias</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-secondary d-block">1º Vencimento:</span>
+                                    <span class="text-warning fw-bold" id="resumoPrimeiroVencimento">--/--/----</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span class="text-secondary d-block">1º Pagamento:</span>
+                                    <span class="text-success fw-bold fs-6" id="resumoPrimeiroValor">R$ 0,00</span>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-secondary" style="font-size: 0.78rem;" id="resumoExplicacao">
+                                Cálculo baseado em mês comercial de 30 dias. A validade inicial do plano cobrirá até a data do 1º vencimento.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 d-flex align-items-center">
+                        <div class="form-check form-switch mt-2">
                             <input class="form-check-input" type="checkbox" asp-for="Student.IsActive" checked />
                             <label class="form-check-label text-light fw-bold" asp-for="Student.IsActive">
                                 Matrícula Ativa
@@ -302,5 +354,69 @@
         document.getElementById('birthDateInput')?.addEventListener('change', updateGuardianVisibility);
         document.getElementById('birthDateInput')?.addEventListener('input', updateGuardianVisibility);
         document.addEventListener('DOMContentLoaded', updateGuardianVisibility);
+
+        // Cálculo Proporcional no Servidor
+        async function calcularResumoProporcional() {
+            const planSelect = document.getElementById('planSelect');
+            const planStartDate = document.getElementById('planStartDate');
+            const selectedDueRadio = document.querySelector('input.due-day-radio:checked');
+            const box = document.getElementById('boxResumoProporcional');
+
+            if (!planSelect || !box) return;
+
+            const planId = planSelect.value;
+            const diaVencimento = selectedDueRadio ? selectedDueRadio.value : '';
+            const dataMatricula = planStartDate ? planStartDate.value : '';
+
+            if (!planId || !diaVencimento) {
+                box.style.display = 'none';
+                return;
+            }
+
+            try {
+                const response = await fetch(`?handler=CalcularProporcional&planId=${encodeURIComponent(planId)}&diaVencimento=${encodeURIComponent(diaVencimento)}&dataMatricula=${encodeURIComponent(dataMatricula)}`);
+                if (!response.ok) {
+                    box.style.display = 'none';
+                    return;
+                }
+
+                const data = await response.json();
+                box.style.display = 'block';
+
+                const formatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                document.getElementById('resumoValorPlano').innerText = formatter.format(data.valorMensalidade);
+                document.getElementById('resumoPrimeiroVencimento').innerText = data.primeiroVencimento;
+                document.getElementById('resumoPrimeiroValor').innerText = formatter.format(data.valorPrimeiroPagamento);
+
+                const elAjuste = document.getElementById('resumoAjuste');
+                const badge = document.getElementById('badgeAjuste');
+
+                if (data.diferencaDias < 0) {
+                    elAjuste.className = 'text-success fw-bold';
+                    elAjuste.innerText = `${data.diferencaDias} dias (${formatter.format(data.valorAjuste)})`;
+                    badge.className = 'badge bg-success text-white fw-bold';
+                    badge.innerText = `Desconto de ${formatter.format(Math.abs(data.valorAjuste))}`;
+                } else if (data.diferencaDias > 0) {
+                    elAjuste.className = 'text-warning fw-bold';
+                    elAjuste.innerText = `+${data.diferencaDias} dias (+${formatter.format(data.valorAjuste)})`;
+                    badge.className = 'badge bg-warning text-dark fw-bold';
+                    badge.innerText = `Acréscimo de ${formatter.format(data.valorAjuste)}`;
+                } else {
+                    elAjuste.className = 'text-white fw-bold';
+                    elAjuste.innerText = '0 dias (Sem ajuste)';
+                    badge.className = 'badge bg-secondary text-white fw-bold';
+                    badge.innerText = 'Sem ajuste';
+                }
+            } catch (err) {
+                console.error('Erro ao calcular proporcional:', err);
+                box.style.display = 'none';
+            }
+        }
+
+        document.getElementById('planSelect')?.addEventListener('change', calcularResumoProporcional);
+        document.getElementById('planStartDate')?.addEventListener('change', calcularResumoProporcional);
+        document.querySelectorAll('input.due-day-radio').forEach(r => r.addEventListener('change', calcularResumoProporcional));
+        document.addEventListener('DOMContentLoaded', calcularResumoProporcional);
     </script>
 }

@@ -288,6 +288,22 @@
                         <label asp-for="Student.PlanEndDate" class="form-label text-light small fw-bold">Vencimento do Plano</label>
                         <input asp-for="Student.PlanEndDate" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
                     </div>
+
+                    <div class="col-12">
+                        <label asp-for="Student.DiaVencimento" class="form-label text-light small fw-bold">
+                            <i class="bi bi-calendar-event text-warning me-1"></i> Dia de Vencimento Fixo no Mês
+                        </label>
+                        <select asp-for="Student.DiaVencimento" class="form-select">
+                            <option value="">-- Sem dia fixo (Regra anterior) --</option>
+                            @foreach (var dia in Model.DiasVencimentoPermitidos)
+                            {
+                                <option value="@dia">Todo dia @dia de cada mês</option>
+                            }
+                        </select>
+                        <div class="form-text text-secondary">
+                            Define dia 10 ou 25 para renovações fixas mensais.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

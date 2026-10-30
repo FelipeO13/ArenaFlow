@@ -1,7 +1,7 @@
 @page "{id:int}"
 @model BoxeGymManager.Pages.Students.DetailsModel
 @{
-    ViewData["Title"] = $"Ficha do Atleta: {Model.Student.FullName}";
+    ViewData["Title"] = $"Ficha do Aluno: {Model.Student.FullName}";
 }
 
 @if (TempData["SuccessMessage"] != null)
@@ -12,261 +12,116 @@
     </div>
 }
 
-<!-- Cabeçalho do Perfil -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div class="d-flex align-items-center gap-3">
-        <div class="rounded-circle bg-danger bg-opacity-25 text-danger d-flex align-items-center justify-content-center fw-bold fs-2" style="width: 65px; height: 65px;">
-            <i class="bi bi-shield-fill"></i>
-        </div>
-        <div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <h1 class="display-6 text-white mb-0">@Model.Student.FullName</h1>
-                <span class="badge bg-danger fs-6">@Model.Student.RegistrationCode</span>
-                <span class="badge bg-warning text-dark fs-6"><i class="bi bi-trophy-fill me-1"></i> @Model.Student.Modality</span>
-                @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
-                {
-                    <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Matrícula Ativa</span>
-                }
-                else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
-                {
-                    <span class="badge bg-warning text-dark fs-6"><i class="bi bi-pause-circle-fill me-1"></i> Trancado Temporariamente</span>
-                }
-                else
-                {
-                    <span class="badge bg-danger fs-6"><i class="bi bi-x-circle-fill me-1"></i> Cancelado</span>
-                }
+<!-- CABEÇALHO DA FICHA DO ALUNO -->
+<div class="boxing-card p-4 mb-4 border-secondary">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle bg-danger bg-opacity-25 text-danger d-flex align-items-center justify-content-center fw-bold fs-2" style="width: 70px; height: 70px; min-width: 70px;">
+                <i class="bi bi-person-badge-fill"></i>
             </div>
-            <div class="text-secondary small mt-1">
-                Cadastrado em: @Model.Student.CreatedAt.ToString("dd/MM/yyyy") &bull; CPF: @(!string.IsNullOrWhiteSpace(Model.Student.CPF) ? Model.Student.CPF : "Não informado") &bull; Tel: @Model.Student.Phone
-            </div>
-        </div>
-    </div>
-    <div class="d-flex gap-2 flex-wrap">
-        @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
-        {
-            <button type="button" class="btn btn-outline-warning fw-semibold" data-bs-toggle="modal" data-bs-target="#modalTrancar">
-                <i class="bi bi-pause-circle me-1"></i> Trancar Matrícula
-            </button>
-            <button type="button" class="btn btn-outline-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCancelar">
-                <i class="bi bi-x-circle me-1"></i> Cancelar Inscrição
-            </button>
-        }
-        else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
-        {
-            <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
-                <input type="hidden" name="id" value="@Model.Student.Id" />
-                <input type="hidden" name="newStatus" value="Ativo" />
-                <button type="submit" class="btn btn-success fw-bold">
-                    <i class="bi bi-play-circle-fill me-1"></i> Reativar Matrícula
-                </button>
-            </form>
-            <button type="button" class="btn btn-outline-danger fw-semibold" data-bs-toggle="modal" data-bs-target="#modalCancelar">
-                <i class="bi bi-x-circle me-1"></i> Cancelar Inscrição
-            </button>
-        }
-        else
-        {
-            <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
-                <input type="hidden" name="id" value="@Model.Student.Id" />
-                <input type="hidden" name="newStatus" value="Ativo" />
-                <button type="submit" class="btn btn-success fw-bold">
-                    <i class="bi bi-arrow-repeat me-1"></i> Reativar Inscrição
-                </button>
-            </form>
-        }
+            <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <h1 class="display-6 text-white mb-0 fw-bold">@Model.Student.FullName</h1>
+                    <span class="badge bg-danger fs-6">@Model.Student.RegistrationCode</span>
+                    <span class="badge bg-warning text-dark fs-6">
+                        <i class="bi bi-trophy-fill me-1"></i> @Model.Student.Modality
+                    </span>
 
-        <a asp-page="./Edit" asp-route-id="@Model.Student.Id" class="btn btn-warning fw-bold text-dark">
-            <i class="bi bi-pencil-square me-1"></i> Editar Dados
-        </a>
-        <a asp-page="/Payments/Create" asp-route-studentId="@Model.Student.Id" class="btn btn-success fw-bold">
-            <i class="bi bi-cash-coin me-1"></i> Novo Pagamento
-        </a>
-        <a asp-page="./Index" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Voltar
-        </a>
-    </div>
-</div>
-
-@if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
-{
-    <div class="alert alert-warning d-flex align-items-center justify-content-between mb-4 border-warning shadow">
-        <div>
-            <div class="fw-bold fs-6">
-                <i class="bi bi-pause-circle-fill fs-5 me-2"></i> MATRÍCULA TRANCADA TEMPORARIAMENTE
-            </div>
-            <div class="small mt-1 text-dark">
-                O acesso aos treinos e ao ringue está suspenso no momento. O histórico e pagamentos permanecem preservados.
-                @if (!string.IsNullOrEmpty(Model.Student.StatusReason))
-                {
-                    <br /><strong>Motivo informado:</strong> @Model.Student.StatusReason
-                }
-                @if (Model.Student.StatusChangedAt.HasValue)
-                {
-                    <br /><span class="text-muted">Trancado em: @Model.Student.StatusChangedAt.Value.ToString("dd/MM/yyyy HH:mm")</span>
-                }
-            </div>
-        </div>
-        <form method="post" asp-page-handler="ChangeStatus" class="d-inline ms-3">
-            <input type="hidden" name="id" value="@Model.Student.Id" />
-            <input type="hidden" name="newStatus" value="Ativo" />
-            <button type="submit" class="btn btn-success btn-sm fw-bold px-3">
-                <i class="bi bi-play-circle-fill me-1"></i> Reativar Agora
-            </button>
-        </form>
-    </div>
-}
-else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
-{
-    <div class="alert alert-danger d-flex align-items-center justify-content-between mb-4 border-danger shadow">
-        <div>
-            <div class="fw-bold fs-6">
-                <i class="bi bi-x-circle-fill fs-5 me-2"></i> MATRÍCULA CANCELADA
-            </div>
-            <div class="small mt-1 text-light">
-                A inscrição deste atleta foi cancelada e o acesso à academia está bloqueado.
-                @if (!string.IsNullOrEmpty(Model.Student.StatusReason))
-                {
-                    <br /><strong>Motivo do cancelamento:</strong> @Model.Student.StatusReason
-                }
-                @if (Model.Student.StatusChangedAt.HasValue)
-                {
-                    <br /><span class="text-white-50">Cancelado em: @Model.Student.StatusChangedAt.Value.ToString("dd/MM/yyyy HH:mm")</span>
-                }
-            </div>
-        </div>
-        <form method="post" asp-page-handler="ChangeStatus" class="d-inline ms-3">
-            <input type="hidden" name="id" value="@Model.Student.Id" />
-            <input type="hidden" name="newStatus" value="Ativo" />
-            <button type="submit" class="btn btn-outline-light btn-sm fw-bold px-3">
-                <i class="bi bi-arrow-repeat me-1"></i> Reativar Inscrição
-            </button>
-        </form>
-    </div>
-}
-
-<div class="row g-4">
-    <!-- Coluna Esquerda: Ficha Técnica, Plano & Emergência -->
-    <div class="col-lg-4">
-        <!-- Cartão Ficha Técnica -->
-        <div class="boxing-card boxing-card-accent-red p-4 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="h5 text-danger mb-0">
-                    <i class="bi bi-shield-shaded me-2"></i> Ficha Técnica
-                </h3>
-                <span class="badge bg-danger">@Model.Student.Modality</span>
-            </div>
-            
-            <div class="d-flex flex-column gap-3">
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Modalidade:</span>
-                    <span class="badge bg-warning text-dark fw-bold">@Model.Student.Modality</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Nível Esportivo:</span>
-                    <span class="badge bg-dark border border-secondary text-warning fw-bold">@Model.Student.ExperienceLevel</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Base (Stance):</span>
-                    <span class="text-white fw-bold">@Model.Student.Stance</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Peso Atual:</span>
-                    <span class="text-white fw-bold">@Model.Student.WeightKg kg</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Categoria:</span>
-                    <span class="text-info fw-bold">@Model.Student.WeightCategory</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Altura:</span>
-                    <span class="text-white fw-bold">@(Model.Student.HeightCm.HasValue ? $"{Model.Student.HeightCm} cm" : "Não informada")</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Envergadura:</span>
-                    <span class="text-white fw-bold">@(Model.Student.ReachCm.HasValue ? $"{Model.Student.ReachCm} cm" : "Não informada")</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary">Atestado Médico:</span>
-                    @if (Model.Student.HasMedicalCertificate)
+                    @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
                     {
-                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Em dia</span>
+                        <span class="badge bg-success fs-6"><i class="bi bi-check-circle-fill me-1"></i> Ativo</span>
+                    }
+                    else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Trancado)
+                    {
+                        <span class="badge bg-warning text-dark fs-6"><i class="bi bi-pause-circle-fill me-1"></i> Suspenso</span>
                     }
                     else
                     {
-                        <span class="badge bg-danger"><i class="bi bi-x-lg"></i> Pendente</span>
+                        <span class="badge bg-danger fs-6"><i class="bi bi-x-circle-fill me-1"></i> Inativo</span>
                     }
                 </div>
+                <div class="text-secondary small d-flex flex-wrap gap-2 align-items-center">
+                    <span><i class="bi bi-calendar-event me-1"></i> Cadastrado em @Model.Student.CreatedAt.ToString("dd/MM/yyyy")</span>
+                    <span>&bull;</span>
+                    <span>
+                        <i class="bi bi-card-checklist me-1 text-warning"></i>
+                        @if (Model.Student.Plan != null)
+                        {
+                            <span>Plano: <strong class="text-white">@Model.Student.Plan.Name</strong></span>
+                            @if (Model.Student.PlanEndDate.HasValue)
+                            {
+                                var isPlanExpired = Model.Student.PlanEndDate.Value < DateTime.Today;
+                                <span class="ms-1 @(isPlanExpired ? "text-danger fw-bold" : "text-success fw-bold")">
+                                    (Validade: @Model.Student.PlanEndDate.Value.ToString("dd/MM/yyyy")@(isPlanExpired ? " - VENCIDO" : ""))
+                                </span>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sem plano ativo associado</span>
+                        }
+                    </span>
+                    <span>&bull;</span>
+                    <span>
+                        <i class="bi bi-calendar2-check me-1 text-info"></i>
+                        Vencimento Fixo: <strong class="text-white">@(Model.Student.DiaVencimento.HasValue ? $"Dia {Model.Student.DiaVencimento.Value}" : "Não definido")</strong>
+                    </span>
+                </div>
             </div>
-
-            @if (!string.IsNullOrEmpty(Model.Student.ModalityNotes))
-            {
-                <div class="mt-3 p-3 bg-dark rounded border border-danger border-opacity-50">
-                    <div class="text-danger small fw-bold mb-1"><i class="bi bi-info-circle me-1"></i> Informações da Modalidade:</div>
-                    <div class="small text-light">@Model.Student.ModalityNotes</div>
-                </div>
-            }
-
-            @if (!string.IsNullOrEmpty(Model.Student.MedicalNotes))
-            {
-                <div class="mt-3 p-3 bg-dark rounded border border-secondary border-opacity-50">
-                    <div class="text-warning small fw-bold mb-1"><i class="bi bi-heart-pulse me-1"></i> Observações Médicas:</div>
-                    <div class="small text-light">@Model.Student.MedicalNotes</div>
-                </div>
-            }
         </div>
 
-        <!-- Plano Atual -->
-        <div class="boxing-card p-4 mb-4">
-            <h3 class="h5 text-warning mb-3">
-                <i class="bi bi-card-checklist me-2"></i> Plano Atual
-            </h3>
-            <div class="fs-5 text-white fw-bold mb-1">
-                @(Model.Student.Plan?.Name ?? "Sem plano ativo")
-            </div>
-            <div class="small text-secondary mb-3">
-                @(Model.Student.Plan?.Description ?? "O aluno não possui assinatura vinculada.")
-            </div>
+        <!-- Botões de Ação do Cabeçalho -->
+        <div class="d-flex gap-2 flex-wrap justify-content-start justify-content-lg-end">
+            <a asp-page="./Index" class="btn btn-outline-secondary px-3">
+                <i class="bi bi-arrow-left me-1"></i> Voltar para a lista
+            </a>
+            <a asp-page="./Edit" asp-route-id="@Model.Student.Id" class="btn btn-warning fw-bold text-dark px-3">
+                <i class="bi bi-pencil-square me-1"></i> Editar aluno
+            </a>
+            <a asp-page="/Payments/Create" asp-route-studentId="@Model.Student.Id" class="btn btn-success fw-bold px-3">
+                <i class="bi bi-cash-coin me-1"></i> Registrar pagamento
+            </a>
 
-            @if (Model.Student.Plan != null)
+            @if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Ativo)
             {
-                <div class="d-flex justify-content-between mb-2 small">
-                    <span class="text-secondary">Mensalidade:</span>
-                    <span class="text-success fw-bold">@Model.Student.Plan.Price.ToString("C")</span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 small">
-                    <span class="text-secondary">Início:</span>
-                    <span class="text-light">@(Model.Student.PlanStartDate?.ToString("dd/MM/yyyy") ?? "-")</span>
-                </div>
-                <div class="d-flex justify-content-between small">
-                    <span class="text-secondary">Vencimento:</span>
-                    <span class="text-light fw-bold">@(Model.Student.PlanEndDate?.ToString("dd/MM/yyyy") ?? "-")</span>
-                </div>
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalTrancar" title="Suspender / Trancar Matrícula">
+                    <i class="bi bi-pause-circle"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar" title="Inativar / Cancelar Inscrição">
+                    <i class="bi bi-x-circle"></i>
+                </button>
             }
-        </div>
-
-        <!-- Contato de Emergência -->
-        <div class="boxing-card p-4 border-secondary">
-            <h3 class="h6 text-uppercase text-secondary fw-bold mb-3">
-                <i class="bi bi-telephone-plus me-1 text-danger"></i> Emergência
-            </h3>
-            <div class="text-white fw-bold">@(!string.IsNullOrEmpty(Model.Student.EmergencyContactName) ? Model.Student.EmergencyContactName : "Não informado")</div>
-            <div class="text-secondary small">Tel: @(!string.IsNullOrEmpty(Model.Student.EmergencyContactPhone) ? Model.Student.EmergencyContactPhone : "Não informado")</div>
+            else
+            {
+                <form method="post" asp-page-handler="ChangeStatus" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Student.Id" />
+                    <input type="hidden" name="newStatus" value="Ativo" />
+                    <button type="submit" class="btn btn-outline-success fw-semibold" title="Reativar Matrícula">
+                        <i class="bi bi-play-circle-fill me-1"></i> Reativar
+                    </button>
+                </form>
+            }
         </div>
     </div>
+</div>
 
-    <!-- Coluna Direita: Dados Pessoais & Filiação, Histórico Financeiro & Frequência de Treinos -->
-    <div class="col-lg-8">
-        <!-- Cartão Dados Pessoais & Filiação -->
-        <div class="boxing-card p-4 mb-4">
-            <h3 class="h5 text-white mb-3">
-                <i class="bi bi-person-lines-fill text-danger me-2"></i> Dados Pessoais & Filiação
+<div class="row g-4">
+    <!-- COLUNA ESQUERDA: DADOS PESSOAIS, FILIAÇÃO & CONTATO DE EMERGÊNCIA -->
+    <div class="col-lg-6 d-flex flex-column gap-4">
+        <!-- 1. DADOS PESSOAIS -->
+        <div class="boxing-card p-4">
+            <h3 class="h5 text-white mb-3 d-flex align-items-center">
+                <i class="bi bi-person-lines-fill text-danger me-2"></i> Dados Pessoais
             </h3>
 
             <div class="row g-3">
-                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                <!-- Nome -->
+                <div class="col-12 border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary small d-block">Nome Completo:</span>
-                    <span class="text-white fw-bold">@Model.Student.FullName</span>
+                    <span class="text-white fw-bold fs-6">@(!string.IsNullOrWhiteSpace(Model.Student.FullName) ? Model.Student.FullName : "Não informado")</span>
                 </div>
+
+                <!-- Data de Nascimento & Idade -->
                 <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary small d-block">Data de Nascimento / Idade:</span>
                     <span class="text-white fw-bold">
@@ -276,15 +131,38 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                         </span>
                     </span>
                 </div>
+
+                <!-- CPF -->
                 <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary small d-block">CPF:</span>
                     <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.CPF) ? Model.Student.CPF : "Não informado")</span>
                 </div>
+
+                <!-- CNH -->
                 <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
                     <span class="text-secondary small d-block">CNH:</span>
-                    <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.CNH) ? Model.Student.CNH : "Não informada")</span>
+                    <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.CNH) ? Model.Student.CNH : "Não informado")</span>
                 </div>
 
+                <!-- Telefone / WhatsApp -->
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Telefone / WhatsApp:</span>
+                    <span class="text-white fw-semibold">@(!string.IsNullOrWhiteSpace(Model.Student.Phone) ? Model.Student.Phone : "Não informado")</span>
+                </div>
+
+                <!-- E-mail -->
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">E-mail:</span>
+                    <span class="text-white">@(!string.IsNullOrWhiteSpace(Model.Student.Email) ? Model.Student.Email : "Não informado")</span>
+                </div>
+
+                <!-- Endereço Completo -->
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Endereço Completo:</span>
+                    <span class="text-white">@(!string.IsNullOrWhiteSpace(Model.Student.Address) ? Model.Student.Address : "Não informado")</span>
+                </div>
+
+                <!-- FILIAÇÃO (quando menor de 18 anos ou preenchido) -->
                 @if (Model.Student.IsUnderage || !string.IsNullOrWhiteSpace(Model.Student.GuardianName))
                 {
                     <div class="col-12 mt-2">
@@ -295,64 +173,211 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                                 </span>
                                 @if (Model.Student.IsUnderage)
                                 {
-                                    <span class="badge bg-warning text-dark small">Aluno Menor</span>
+                                    <span class="badge bg-warning text-dark small">Aluno Menor (&lt; 18)</span>
                                 }
                             </div>
                             <div class="row g-2">
-                                <div class="col-md-4">
-                                    <span class="text-secondary small d-block">Responsável:</span>
+                                <div class="col-md-6">
+                                    <span class="text-secondary small d-block">Nome do Pai, Mãe ou Responsável:</span>
                                     <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianName) ? Model.Student.GuardianName : "Não informado")</span>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <span class="text-secondary small d-block">Telefone do Responsável:</span>
                                     <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianPhone) ? Model.Student.GuardianPhone : "Não informado")</span>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-12">
                                     <span class="text-secondary small d-block">Endereço do Responsável:</span>
-                                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianAddress) ? Model.Student.GuardianAddress : "Mesmo do aluno / Não informado")</span>
+                                    <span class="text-white">@(!string.IsNullOrWhiteSpace(Model.Student.GuardianAddress) ? Model.Student.GuardianAddress : "Não informado")</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
+            </div>
+        </div>
 
-                <div class="col-12 border-bottom border-secondary border-opacity-25 pb-2">
-                    <span class="text-secondary small d-block">Endereço Completo:</span>
-                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.Address) ? Model.Student.Address : "Não informado")</span>
+        <!-- 2. CONTATO DE EMERGÊNCIA -->
+        <div class="boxing-card p-4 border border-secondary border-opacity-50">
+            <h3 class="h5 text-white mb-3 d-flex align-items-center">
+                <i class="bi bi-telephone-plus text-danger me-2"></i> Contato de Emergência
+            </h3>
+            <div class="row g-3">
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Nome do Contato:</span>
+                    <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.EmergencyContactName) ? Model.Student.EmergencyContactName : "Não informado")</span>
                 </div>
-                <div class="col-md-6">
-                    <span class="text-secondary small d-block">E-mail:</span>
-                    <span class="text-light">@(!string.IsNullOrWhiteSpace(Model.Student.Email) ? Model.Student.Email : "Não informado")</span>
-                </div>
-                <div class="col-md-6">
-                    <span class="text-secondary small d-block">Telefone / WhatsApp:</span>
-                    <span class="text-white fw-bold">@Model.Student.Phone</span>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Telefone de Emergência:</span>
+                    <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.EmergencyContactPhone) ? Model.Student.EmergencyContactPhone : "Não informado")</span>
                 </div>
             </div>
         </div>
 
-        <!-- Histórico de Mensalidades -->
-        <div class="boxing-card p-4 mb-4">
+        <!-- 3. FICHA TÉCNICA -->
+        <div class="boxing-card boxing-card-accent-red p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 text-danger mb-0">
+                    <i class="bi bi-shield-shaded me-2"></i> Ficha Técnica
+                </h3>
+                <span class="badge bg-danger">@Model.Student.Modality</span>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Modalidade:</span>
+                    <span class="badge bg-warning text-dark fw-bold">@Model.Student.Modality</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Nível Esportivo:</span>
+                    <span class="badge bg-dark border border-secondary text-warning fw-bold">@Model.Student.ExperienceLevel</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Base de Luta (Stance):</span>
+                    <span class="text-white fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.Stance) ? Model.Student.Stance : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Peso Atual:</span>
+                    <span class="text-white fw-bold">@(Model.Student.WeightKg > 0 ? $"{Model.Student.WeightKg} kg" : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Categoria de Peso:</span>
+                    <span class="text-info fw-bold">@(!string.IsNullOrWhiteSpace(Model.Student.WeightCategory) ? Model.Student.WeightCategory : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Altura:</span>
+                    <span class="text-white fw-bold">@(Model.Student.HeightCm.HasValue ? $"{Model.Student.HeightCm} cm" : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Envergadura:</span>
+                    <span class="text-white fw-bold">@(Model.Student.ReachCm.HasValue ? $"{Model.Student.ReachCm} cm" : "Não informado")</span>
+                </div>
+                <div class="col-md-6 border-bottom border-secondary border-opacity-25 pb-2">
+                    <span class="text-secondary small d-block">Atestado Médico:</span>
+                    @if (Model.Student.HasMedicalCertificate)
+                    {
+                        <span class="badge bg-success"><i class="bi bi-check-lg"></i> Em dia</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger"><i class="bi bi-x-lg"></i> Pendente</span>
+                    }
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Student.ModalityNotes))
+                {
+                    <div class="col-12 mt-2">
+                        <div class="p-3 bg-dark rounded border border-danger border-opacity-50">
+                            <span class="text-danger small fw-bold d-block mb-1">
+                                <i class="bi bi-info-circle me-1"></i> Informações da Modalidade:
+                            </span>
+                            <span class="small text-light">@Model.Student.ModalityNotes</span>
+                        </div>
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Student.MedicalNotes))
+                {
+                    <div class="col-12 mt-2">
+                        <div class="p-3 bg-dark rounded border border-secondary border-opacity-50">
+                            <span class="text-warning small fw-bold d-block mb-1">
+                                <i class="bi bi-heart-pulse me-1"></i> Restrições Médicas / Observações:
+                            </span>
+                            <span class="small text-light">@Model.Student.MedicalNotes</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- COLUNA DIREITA: SITUAÇÃO DE PAGAMENTO & FREQUÊNCIA -->
+    <div class="col-lg-6 d-flex flex-column gap-4">
+        <!-- 4. SITUAÇÃO DE PAGAMENTO -->
+        <div class="boxing-card p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3 class="h5 text-white mb-0">
-                    <i class="bi bi-cash-stack text-success me-2"></i> Histórico de Mensalidades & Pagamentos
+                    <i class="bi bi-cash-stack text-success me-2"></i> Situação de Pagamento
                 </h3>
+                <span class="badge @Model.PaymentStatusBadgeClass fs-6 px-3 py-2">
+                    @Model.PaymentStatusText
+                </span>
+            </div>
+
+            <!-- Resumo Financeiro Superior -->
+            <div class="row g-3 mb-4">
+                <div class="col-sm-4">
+                    <div class="p-3 bg-dark rounded border border-secondary border-opacity-25 h-100">
+                        <span class="text-secondary small d-block">Vencimento do Plano:</span>
+                        @if (Model.Student.PlanEndDate.HasValue)
+                        {
+                            var isPlanExpired = Model.Student.PlanEndDate.Value < DateTime.Today;
+                            <span class="fw-bold @(isPlanExpired ? "text-danger" : "text-white") fs-6">
+                                @Model.Student.PlanEndDate.Value.ToString("dd/MM/yyyy")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted fw-semibold">Não informado</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="p-3 bg-dark rounded border border-secondary border-opacity-25 h-100">
+                        <span class="text-secondary small d-block">Dia de Vencimento Fixo:</span>
+                        @if (Model.Student.DiaVencimento.HasValue)
+                        {
+                            <span class="text-warning fw-bold fs-6">
+                                Todo dia @Model.Student.DiaVencimento.Value
+                            </span>
+                            <span class="text-muted small d-block">Renovação programada</span>
+                        }
+                        else
+                        {
+                            <span class="text-secondary fw-semibold">Não fixado</span>
+                            <span class="text-muted small d-block">Regra anterior</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="col-sm-4">
+                    <div class="p-3 bg-dark rounded border border-secondary border-opacity-25 h-100">
+                        <span class="text-secondary small d-block">Último Pagamento:</span>
+                        @if (Model.LastPayment != null)
+                        {
+                            <span class="text-success fw-bold fs-6">
+                                @Model.LastPayment.Amount.ToString("C")
+                            </span>
+                            <span class="text-secondary small d-block">
+                                @(Model.LastPayment.PaidDate?.ToString("dd/MM/yyyy") ?? Model.LastPayment.DueDate.ToString("dd/MM/yyyy"))
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted fw-semibold">Nenhum pagamento</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabela de Histórico de Pagamentos -->
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-secondary small fw-bold text-uppercase">Histórico de Mensalidades</span>
                 <a asp-page="/Payments/Create" asp-route-studentId="@Model.Student.Id" class="btn btn-sm btn-outline-success">
-                    <i class="bi bi-plus-circle me-1"></i> Lançar Pagamento
+                    <i class="bi bi-plus-circle me-1"></i> Novo Pagamento
                 </a>
             </div>
 
             @if (Model.Payments.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-dark-custom">
+                    <table class="table table-dark-custom align-middle small">
                         <thead>
                             <tr>
-                                <th>Referência</th>
+                                <th>Data</th>
                                 <th>Valor</th>
-                                <th>Vencimento</th>
-                                <th>Status</th>
                                 <th>Forma</th>
+                                <th>Status</th>
                                 <th class="text-end">Recibo</th>
                             </tr>
                         </thead>
@@ -360,9 +385,16 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                             @foreach (var p in Model.Payments)
                             {
                                 <tr>
-                                    <td class="fw-bold text-white">@p.ReferenceMonthYear</td>
+                                    <td>
+                                        <div class="fw-bold text-white">@(p.PaidDate?.ToString("dd/MM/yyyy") ?? p.DueDate.ToString("dd/MM/yyyy"))</div>
+                                        <div class="text-muted small">Ref: @p.ReferenceMonthYear</div>
+                                    </td>
                                     <td class="text-success fw-bold">@p.Amount.ToString("C")</td>
-                                    <td>@p.DueDate.ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <span class="badge bg-dark border border-secondary text-secondary">
+                                            @p.Method
+                                        </span>
+                                    </td>
                                     <td>
                                         @if (p.Status == BoxeGymManager.Models.PaymentStatus.Pago)
                                         {
@@ -377,10 +409,9 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                                             <span class="badge bg-warning text-dark">Pendente</span>
                                         }
                                     </td>
-                                    <td><span class="badge bg-dark border border-secondary text-secondary">@p.Method</span></td>
                                     <td class="text-end">
-                                        <a asp-page="/Payments/Receipt" asp-route-id="@p.Id" class="btn btn-sm btn-outline-light" title="Ver Recibo">
-                                            <i class="bi bi-receipt"></i> Recibo
+                                        <a asp-page="/Payments/Receipt" asp-route-id="@p.Id" class="btn btn-sm btn-outline-light" title="Ver Recibo Imprimível">
+                                            <i class="bi bi-receipt"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -391,38 +422,46 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
             }
             else
             {
-                <div class="text-center py-4 text-muted">
+                <div class="text-center py-4 text-muted bg-dark bg-opacity-50 rounded border border-secondary border-opacity-25">
+                    <i class="bi bi-credit-card fs-2 d-block mb-2 text-secondary"></i>
                     Nenhum pagamento registrado para este aluno.
                 </div>
             }
         </div>
 
-        <!-- Histórico de Presenças / Treinos -->
+        <!-- 5. FREQUÊNCIA NO RINGUE / CHECK-INS -->
         <div class="boxing-card p-4">
-            <h3 class="h5 text-white mb-3">
-                <i class="bi bi-calendar-check text-primary me-2"></i> Histórico de Frequência no Ringue (Últimos 20 Treinos)
-            </h3>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="h5 text-white mb-0">
+                    <i class="bi bi-calendar-check text-primary me-2"></i> Frequência de Treinos
+                </h3>
+                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary px-3 py-2 fw-bold">
+                    <i class="bi bi-fire me-1"></i> @Model.MonthlyCheckInsCount check-ins este mês
+                </span>
+            </div>
 
-            @if (Model.Attendances.Any())
+            <p class="text-secondary small mb-3">Últimos 10 acessos registrados na catraca e portaria.</p>
+
+            @if (Model.RecentAttendances.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-dark-custom small">
+                    <table class="table table-dark-custom align-middle small">
                         <thead>
                             <tr>
                                 <th>Data</th>
                                 <th>Entrada</th>
                                 <th>Saída</th>
-                                <th>Tempo de Treino</th>
-                                <th>Status da Portaria</th>
+                                <th>Treino</th>
+                                <th class="text-end">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var a in Model.Attendances)
+                            @foreach (var a in Model.RecentAttendances)
                             {
                                 <tr>
                                     <td class="text-light fw-bold">@a.EntryTime.ToString("dd/MM/yyyy")</td>
-                                    <td class="text-info">@a.EntryTime.ToString("HH:mm")</td>
-                                    <td>@(a.ExitTime.HasValue ? a.ExitTime.Value.ToString("HH:mm") : "Presente")</td>
+                                    <td class="text-info fw-semibold">@a.EntryTime.ToString("HH:mm")</td>
+                                    <td>@(a.ExitTime.HasValue ? a.ExitTime.Value.ToString("HH:mm") : "-")</td>
                                     <td>
                                         @if (a.ExitTime.HasValue)
                                         {
@@ -434,14 +473,14 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
                                             <span class="badge bg-success bg-opacity-75">Treinando</span>
                                         }
                                     </td>
-                                    <td>
+                                    <td class="text-end">
                                         @if (a.AccessStatus == BoxeGymManager.Models.AccessStatus.Autorizado)
                                         {
                                             <span class="badge bg-success">Autorizado</span>
                                         }
                                         else if (a.AccessStatus == BoxeGymManager.Models.AccessStatus.AlertaVencimento)
                                         {
-                                            <span class="badge bg-warning text-dark">Alerta Pendência</span>
+                                            <span class="badge bg-warning text-dark">Alerta</span>
                                         }
                                         else
                                         {
@@ -456,83 +495,62 @@ else if (Model.Student.Status == BoxeGymManager.Models.StudentStatus.Cancelado)
             }
             else
             {
-                <div class="text-center py-4 text-muted">
-                    Nenhuma presença registrada ainda.
+                <div class="text-center py-4 text-muted bg-dark bg-opacity-50 rounded border border-secondary border-opacity-25">
+                    <i class="bi bi-clock-history fs-2 d-block mb-2 text-secondary"></i>
+                    Nenhum check-in registrado para este aluno.
                 </div>
             }
         </div>
     </div>
 </div>
 
-<!-- Modal Trancar Matrícula -->
-<div class="modal fade" id="modalTrancar" tabindex="-1" aria-labelledby="modalTrancarLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<!-- Modais de Suspensão / Cancelamento -->
+<div class="modal fade" id="modalTrancar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-warning">
             <form method="post" asp-page-handler="ChangeStatus">
                 <input type="hidden" name="id" value="@Model.Student.Id" />
                 <input type="hidden" name="newStatus" value="Trancado" />
-
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-warning" id="modalTrancarLabel">
-                        <i class="bi bi-pause-circle-fill me-2"></i> Trancar Matrícula Temporariamente
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title text-warning"><i class="bi bi-pause-circle-fill me-2"></i> Trancar / Suspender Matrícula</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p>
-                        A matrícula de <strong>@Model.Student.FullName</strong> será colocada em pausa.
-                        O acesso aos treinos será suspenso na catraca, mas o histórico e fichas permanecem salvos.
-                    </p>
+                    <p>A matrícula de <strong>@Model.Student.FullName</strong> será colocada em pausa. O acesso aos treinos será suspenso na catraca, mas o histórico e fichas permanecem salvos.</p>
                     <div class="mb-3">
-                        <label class="form-label text-light small fw-bold">Motivo do Trancamento (opcional)</label>
-                        <input type="text" name="reason" class="form-control" placeholder="Ex: Viagem por 30 dias, lesão no ombro, férias..." />
-                        <div class="form-text text-secondary">
-                            O motivo ficará visível na ficha e na portaria se o atleta tentar entrar.
-                        </div>
+                        <label class="form-label text-light small fw-bold">Motivo do Trancamento (opcional):</label>
+                        <input type="text" name="reason" class="form-control bg-black text-white border-secondary" placeholder="Ex: Viagem, atestado médico por 30 dias..." />
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    <button type="submit" class="btn btn-warning fw-bold text-dark">
-                        <i class="bi bi-pause-circle me-1"></i> Confirmar Trancamento
-                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold">Confirmar Suspensão</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modal Cancelar Inscrição -->
-<div class="modal fade" id="modalCancelar" tabindex="-1" aria-labelledby="modalCancelarLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalCancelar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-dark text-white border-danger">
             <form method="post" asp-page-handler="ChangeStatus">
                 <input type="hidden" name="id" value="@Model.Student.Id" />
                 <input type="hidden" name="newStatus" value="Cancelado" />
-
                 <div class="modal-header border-secondary">
-                    <h5 class="modal-title text-danger" id="modalCancelarLabel">
-                        <i class="bi bi-x-circle-fill me-2"></i> Cancelar Inscrição do Aluno
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title text-danger"><i class="bi bi-x-circle-fill me-2"></i> Cancelar / Inativar Matrícula</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-danger fw-semibold">
-                        Atenção: A matrícula de <strong>@Model.Student.FullName</strong> será cancelada.
-                    </p>
-                    <p class="small text-secondary">
-                        O atleta terá o acesso bloqueado na academia. Você poderá reativá-lo a qualquer momento no futuro se ele retornar.
-                    </p>
+                    <p class="text-danger fw-bold">Atenção: A matrícula de @Model.Student.FullName será inativada e o acesso à academia será bloqueado.</p>
                     <div class="mb-3">
-                        <label class="form-label text-light small fw-bold">Motivo do Cancelamento</label>
-                        <input type="text" name="reason" class="form-control" placeholder="Ex: Desistência, mudança de cidade, financeiro..." />
+                        <label class="form-label text-light small fw-bold">Motivo do Cancelamento (opcional):</label>
+                        <input type="text" name="reason" class="form-control bg-black text-white border-secondary" placeholder="Ex: Mudança de cidade, desistência..." />
                     </div>
                 </div>
                 <div class="modal-footer border-secondary">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
-                    <button type="submit" class="btn btn-danger fw-bold">
-                        <i class="bi bi-trash3 me-1"></i> Confirmar Cancelamento
-                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-danger fw-bold">Confirmar Inativação</button>
                 </div>
             </form>
         </div>

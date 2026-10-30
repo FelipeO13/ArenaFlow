@@ -36,8 +36,29 @@ public class CreateModel : PageModel
                 Payment.StudentId = student.Id;
                 if (student.Plan != null)
                 {
-                    Payment.Amount = student.Plan.Price;
-                    Payment.Notes = $"Mensalidade - {student.Plan.Name}";
+                    var hasPaid = await _context.Payments.AnyAsync(p => p.StudentId == student.Id && p.Status == PaymentStatus.Pago);
+                    if (!hasPaid && student.DiaVencimento.HasValue)
+                    {
+                        var start = student.PlanStartDate ?? student.CreatedAt;
+                        var res = BoxeGymManager.Services.CalculadoraVencimento.CalcularPrimeiroVencimento(student.Plan.Price, student.DiaVencimento.Value, start);
+                        Payment.Amount = res.ValorPrimeiroPagamento;
+                        Payment.DueDate = res.PrimeiroVencimento;
+                        Payment.ReferenceMonthYear = $"{res.PrimeiroVencimento.Month:D2}/{res.PrimeiroVencimento.Year}";
+                        var sinal = res.DiferencaDias > 0 ? $"+{res.DiferencaDias}" : $"{res.DiferencaDias}";
+                        var tipo = res.DiferencaDias < 0 ? $"desconto de {Math.Abs(res.ValorAjuste):C}" : (res.DiferencaDias > 0 ? $"acréscimo de {res.ValorAjuste:C}" : "sem ajuste");
+                        Payment.Notes = $"1ª Mensalidade proporcional ({sinal} dias, {tipo}) - Plano {student.Plan.Name} (Venc. dia {student.DiaVencimento})";
+                    }
+                    else
+                    {
+                        Payment.Amount = student.Plan.Price;
+                        Payment.Notes = $"Mensalidade - {student.Plan.Name}";
+                        if (student.DiaVencimento.HasValue && student.PlanEndDate.HasValue)
+                        {
+                            var proximaValidade = BoxeGymManager.Services.CalculadoraVencimento.CalcularProximaValidade(student, student.Plan);
+                            Payment.DueDate = proximaValidade;
+                            Payment.ReferenceMonthYear = $"{proximaValidade.Month:D2}/{proximaValidade.Year}";
+                        }
+                    }
                 }
             }
         }
@@ -73,17 +94,7 @@ public class CreateModel : PageModel
             var student = await _context.Students.Include(s => s.Plan).FirstOrDefaultAsync(s => s.Id == Payment.StudentId);
             if (student?.Plan != null)
             {
-                var baseDate = student.PlanEndDate.HasValue && student.PlanEndDate.Value > DateTime.Today 
-                    ? student.PlanEndDate.Value 
-                    : DateTime.Today;
-
-                student.PlanEndDate = student.Plan.BillingCycle switch
-                {
-                    PlanBillingCycle.Trimestral => baseDate.AddMonths(3),
-                    PlanBillingCycle.Semestral => baseDate.AddMonths(6),
-                    PlanBillingCycle.Anual => baseDate.AddYears(1),
-                    _ => baseDate.AddMonths(1)
-                };
+                student.PlanEndDate = BoxeGymManager.Services.CalculadoraVencimento.CalcularProximaValidade(student, student.Plan);
             }
         }
 

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using System.IO;
 
 using BoxeGymManager.Models;
+using BoxeGymManager.Services;
+
 namespace BoxeGymManager.Pages.Students;
 
 public class EditModel : PageModel
@@ -23,6 +25,8 @@ public class EditModel : PageModel
     public Student Student { get; set; } = null!;
 
     public SelectList PlansList { get; set; } = null!;
+
+    public int[] DiasVencimentoPermitidos => CalculadoraVencimento.DiasVencimentoPermitidos;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -113,6 +117,7 @@ public class EditModel : PageModel
         dbStudent.PlanId = Student.PlanId;
         dbStudent.PlanStartDate = Student.PlanStartDate;
         dbStudent.PlanEndDate = Student.PlanEndDate;
+        dbStudent.DiaVencimento = Student.DiaVencimento;
         if (dbStudent.Status != Student.Status)
         {
             dbStudent.Status = Student.Status;

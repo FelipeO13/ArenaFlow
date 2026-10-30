@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BoxeGymManager.Data;
 using BoxeGymManager.Models;
+using BoxeGymManager.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+
 namespace BoxeGymManager.Pages.Students;
 
 public class CreateModel : PageModel
@@ -28,6 +30,8 @@ public class CreateModel : PageModel
 
     public SelectList PlansList { get; set; } = null!;
 
+    public int[] DiasVencimentoPermitidos => CalculadoraVencimento.DiasVencimentoPermitidos;
+
     public async Task<IActionResult> OnGetAsync()
     {
         // Gerar código de matrícula sugerido
@@ -35,9 +39,31 @@ public class CreateModel : PageModel
         Student.RegistrationCode = $"BX-{1001 + count}";
         Student.BirthDate = DateTime.Today.AddYears(-20);
         Student.PlanStartDate = DateTime.Today;
+        Student.DiaVencimento = 10; // Padrão selecionado
 
         await LoadPlansAsync();
         return Page();
+    }
+
+    public async Task<IActionResult> OnGetCalcularProporcionalAsync(int planId, int diaVencimento, string? dataMatricula)
+    {
+        var plan = await _context.Plans.FindAsync(planId);
+        if (plan == null) return NotFound();
+
+        DateTime start = DateTime.TryParse(dataMatricula, out var d) ? d : DateTime.Today;
+        var res = CalculadoraVencimento.CalcularPrimeiroVencimento(plan.Price, diaVencimento, start);
+
+        return new JsonResult(new
+        {
+            valorMensalidade = res.ValorMensalidade,
+            valorDiario = res.ValorDiario,
+            dataReferencia = res.DataReferencia.ToString("dd/MM/yyyy"),
+            primeiroVencimento = res.PrimeiroVencimento.ToString("dd/MM/yyyy"),
+            diferencaDias = res.DiferencaDias,
+            valorAjuste = res.ValorAjuste,
+            valorPrimeiroPagamento = res.ValorPrimeiroPagamento,
+            tipoAjuste = res.DiferencaDias < 0 ? "desconto" : (res.DiferencaDias > 0 ? "acrescimo" : "nenhum")
+        });
     }
 
     public async Task<IActionResult> OnPostAsync()
@@ -47,6 +73,15 @@ public class CreateModel : PageModel
             ModelState.AddModelError("", "Nome completo e matrícula são obrigatórios.");
             await LoadPlansAsync();
             return Page();
+        }
+
+        // Validação de Dia de Vencimento
+        if (Student.PlanId.HasValue)
+        {
+            if (!Student.DiaVencimento.HasValue || !CalculadoraVencimento.DiasVencimentoPermitidos.Contains(Student.DiaVencimento.Value))
+            {
+                ModelState.AddModelError("Student.DiaVencimento", "Selecione o dia de vencimento fixo (10 ou 25).");
+            }
         }
 
         // Validação de CNH (opcional, mas deve ter 11 dígitos se preenchida)
@@ -126,20 +161,28 @@ public class CreateModel : PageModel
             Student.WeightCategory = Student.WeightCategory.Trim();
         }
 
-        // Se selecionou plano, calcular data de término
+        // Se selecionou plano, calcular data de término inicial
         if (Student.PlanId.HasValue)
         {
             var plan = await _context.Plans.FindAsync(Student.PlanId.Value);
             if (plan != null)
             {
                 var start = Student.PlanStartDate ?? DateTime.Today;
-                Student.PlanEndDate = plan.BillingCycle switch
+                if (Student.DiaVencimento.HasValue)
                 {
-                    PlanBillingCycle.Trimestral => start.AddMonths(3),
-                    PlanBillingCycle.Semestral => start.AddMonths(6),
-                    PlanBillingCycle.Anual => start.AddYears(1),
-                    _ => start.AddMonths(1)
-                };
+                    var res = CalculadoraVencimento.CalcularPrimeiroVencimento(plan.Price, Student.DiaVencimento.Value, start);
+                    Student.PlanEndDate = res.PrimeiroVencimento;
+                }
+                else
+                {
+                    Student.PlanEndDate = plan.BillingCycle switch
+                    {
+                        PlanBillingCycle.Trimestral => start.AddMonths(3),
+                        PlanBillingCycle.Semestral => start.AddMonths(6),
+                        PlanBillingCycle.Anual => start.AddYears(1),
+                        _ => start.AddMonths(1)
+                    };
+                }
             }
         }
 
@@ -147,21 +190,36 @@ public class CreateModel : PageModel
         _context.Students.Add(Student);
         await _context.SaveChangesAsync();
 
-        // Gerar primeira mensalidade pendente se tiver plano
+        // Gerar primeira mensalidade se tiver plano
         if (Student.PlanId.HasValue)
         {
             var plan = await _context.Plans.FindAsync(Student.PlanId.Value);
             if (plan != null)
             {
+                var start = Student.PlanStartDate ?? DateTime.Today;
+                decimal valorPrimeiroPagamento = plan.Price;
+                DateTime vencimentoPrimeiroPagamento = DateTime.Today.AddDays(5);
+                string obsAjuste = "Primeira mensalidade";
+
+                if (Student.DiaVencimento.HasValue)
+                {
+                    var res = CalculadoraVencimento.CalcularPrimeiroVencimento(plan.Price, Student.DiaVencimento.Value, start);
+                    valorPrimeiroPagamento = res.ValorPrimeiroPagamento;
+                    vencimentoPrimeiroPagamento = res.PrimeiroVencimento;
+                    var sinal = res.DiferencaDias > 0 ? $"+{res.DiferencaDias}" : $"{res.DiferencaDias}";
+                    var tipo = res.DiferencaDias < 0 ? $"desconto de {Math.Abs(res.ValorAjuste):C}" : (res.DiferencaDias > 0 ? $"acréscimo de {res.ValorAjuste:C}" : "sem ajuste");
+                    obsAjuste = $"1ª Mensalidade proporcional ({sinal} dias, {tipo}) - Venc. dia {Student.DiaVencimento}";
+                }
+
                 var payment = new Payment
                 {
                     StudentId = Student.Id,
-                    Amount = plan.Price,
-                    DueDate = DateTime.Today.AddDays(5),
+                    Amount = valorPrimeiroPagamento,
+                    DueDate = vencimentoPrimeiroPagamento,
                     Status = PaymentStatus.Pendente,
-                    ReferenceMonthYear = $"{DateTime.Today.Month:D2}/{DateTime.Today.Year}",
+                    ReferenceMonthYear = $"{vencimentoPrimeiroPagamento.Month:D2}/{vencimentoPrimeiroPagamento.Year}",
                     ReceiptCode = $"REC-{DateTime.Today.Year}{DateTime.Today.Month:D2}-{Student.Id:D3}",
-                    Notes = $"Primeira mensalidade - Matrícula Plano {plan.Name}"
+                    Notes = $"{obsAjuste} - Plano {plan.Name}"
                 };
                 _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
